@@ -75,8 +75,8 @@ public class FileDocument
 		if (com.mendix.core.Core.isSubClassOf("System.Image", mendixObject.getType()))
 			return system.proxies.Image.initialize(context, mendixObject);
 
-		if (com.mendix.core.Core.isSubClassOf("MyFirstModule.SalesOrderImport", mendixObject.getType()))
-			return myfirstmodule.proxies.SalesOrderImport.initialize(context, mendixObject);
+		if (com.mendix.core.Core.isSubClassOf("TestPivotTableWebWidget.SalesOrderImport", mendixObject.getType()))
+			return testpivottablewebwidget.proxies.SalesOrderImport.initialize(context, mendixObject);
 
 		if (com.mendix.core.Core.isSubClassOf("ExcelImporter.TemplateDocument", mendixObject.getType()))
 			return excelimporter.proxies.TemplateDocument.initialize(context, mendixObject);
