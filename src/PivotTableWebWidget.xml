@@ -18,11 +18,199 @@
         OPbVvh/mv+4We9irjS8u7lM1a5CrqOt6VfOQBo0/AQYADu2BHPVXcUgAAAAASUVORK5CYII=
     </icon>
     <properties>
-        <propertyGroup caption="General">
-            <property key="sampleText" type="string" required="false">
-                <caption>Default value</caption>
-                <description>Sample text input</description>
+    
+        <!-- Datasouce properties -->
+
+        <propertyGroup caption="Datasource">
+            <property key="dataSourceType" type="enumeration" defaultValue="datasource">
+                <caption>Data source type</caption>
+                <description></description>
+                <enumerationValues>
+                    <enumerationValue key="datasource">Data source</enumerationValue>
+                    <enumerationValue key="serviceCall">Service call</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="ds" type="datasource" isList="true" required="false">
+                <caption>Table data</caption>
+                <description>Datasource for the pivot table</description>
+            </property>
+            <property key="dataChangeDateAttr" type="attribute">
+                <caption>Data change date</caption>
+                <description>Update the date in your logic to make the widget update the table. (Pluggable widgets are rendered VERY often!)</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            <property key="cellValueAttr" type="attribute" dataSource="ds" required="false">
+                <caption>Cell value </caption>
+                <description>The attribute used as cell value. Not necessary for cell value action count. All other actions are performed on this attribute</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                    <attributeType name="DateTime"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="xIdAttr" type="attribute" dataSource="ds" required="false">
+                <caption>X-axis ID</caption>
+                <description>The attribute used for grouping the data on the X-axis.</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="DateTime"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="xLabelAttr" type="attribute" dataSource="ds" required="false">
+                <caption>X-axis label</caption>
+                <description>The attribute used as column heading.</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="DateTime"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="yIdAttr" type="attribute" dataSource="ds" required="false">
+                <caption>Y-axis ID </caption>
+                <description>The attribute used for grouping the data on the Y-axis.</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="DateTime"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="yLabelAttr" type="attribute" dataSource="ds" required="false">
+                <caption>Y-axis label</caption>
+                <description>The attribute used as row label.</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="DateTime"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+
+        </propertyGroup>
+    
+        <!-- Table properties -->
+
+        <propertyGroup caption="Table">
+            <property key="cellValueAction" type="enumeration" defaultValue="count">
+                <caption>Cell value action</caption>
+                <description>The action to perform on the values of the objects that exist behind one cell.</description>
+                <enumerationValues>
+                    <enumerationValue key="count">Count</enumerationValue>
+                    <enumerationValue key="sum">Sum</enumerationValue>
+                    <enumerationValue key="average">Average</enumerationValue>
+                    <enumerationValue key="min">Min</enumerationValue>
+                    <enumerationValue key="max">Max</enumerationValue>
+                    <enumerationValue key="display">Display</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="precisionForAverage" type="integer" defaultValue="0">
+                <caption>Decimal precision for average</caption>
+                <description>Decimal precision for average, applicable for integer and long values only</description>
+            </property>
+            <property key="precisionForDecimal" type="integer" defaultValue="2">
+                <caption>Decimal precision for Decimal</caption>
+                <description>Decimal precision for Decimal, also for average</description>
+            </property>
+            <property key="cellValueDateformat" type="string" defaultValue="dd-MM-yyyy">
+                <caption>Cell value date format</caption>
+                <description>Cell value date format, applicable for date/time only</description>
+            </property>
+            <property key="showTotalColumn" type="boolean" defaultValue="false">
+                <caption>Show total column</caption>
+                <description>Show row total column as last column.</description>
+            </property>
+            <property key="totalColumnLabel" type="textTemplate" required="false">
+                <caption>Total column label</caption>
+                <description>Total column label</description>
+            </property>
+            <property key="showTotalRow" type="boolean" defaultValue="false">
+                <caption>Show total row</caption>
+                <description>Show row total row as last row.</description>
+            </property>
+            <property key="totalRowLabel" type="textTemplate" required="false">
+                <caption>Total row label</caption>
+                <description>Total row label</description>
+            </property>
+            <property key="noDataText" type="textTemplate">
+                <caption>No data text</caption>
+                <description>Text to display when there is no data to display</description>
+                <translations>
+                    <translation lang="en_GB">No data to display</translation>
+                    <translation lang="en_US">No data to display</translation>
+                    <translation lang="nl_NL">Geen gegevens beschikbaar</translation>
+                </translations>
             </property>
         </propertyGroup>
+    
+        <propertyGroup caption="Axis configuration">
+
+            <!-- X-axis properties -->
+
+            <propertyGroup caption="X-axis">
+                <property key="xLabelDateformat" type="string" defaultValue="dd-MM-yyyy">
+                    <caption>X-axis date format</caption>
+                    <description>X-axis date format, applicable for date/time only</description>
+                </property>
+                <property key="xSortAttr" type="enumeration" defaultValue="label">
+                    <caption>X-axis sort attribute</caption>
+                    <description>The attribute used for sorting the data on the X-axis. Defaults to label attribute</description>
+                    <enumerationValues>
+                        <enumerationValue key="label">Label</enumerationValue>
+                        <enumerationValue key="id">ID</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="xSortDirection" type="enumeration" defaultValue="asc">
+                    <caption>X-axis sort direction</caption>
+                    <description>Sort ascending or descending</description>
+                    <enumerationValues>
+                        <enumerationValue key="asc">Ascending</enumerationValue>
+                        <enumerationValue key="desc">Descending</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+
+            <!-- Y-axis properties -->
+
+            <propertyGroup caption="Y-axis">
+                <property key="yLabelDateformat" type="string" defaultValue="dd-MM-yyyy">
+                    <caption>Y-axis date format</caption>
+                    <description>Y-axis date format, applicable for date/time only</description>
+                </property>
+                <property key="ySortAttr" type="enumeration" defaultValue="label">
+                    <caption>Y-axis sort attribute</caption>
+                    <description>The attribute used for sorting the data on the Y-axis. Defaults to label attribute</description>
+                    <enumerationValues>
+                        <enumerationValue key="label">Label</enumerationValue>
+                        <enumerationValue key="id">ID</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="ySortDirection" type="enumeration" defaultValue="asc">
+                    <caption>Y-axis sort direction</caption>
+                    <description>Sort ascending or descending</description>
+                    <enumerationValues>
+                        <enumerationValue key="asc">Ascending</enumerationValue>
+                        <enumerationValue key="desc">Descending</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+
+
     </properties>
 </widget>
