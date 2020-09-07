@@ -20,6 +20,22 @@ Especially when using non-persistent entities it is best to use a web service ra
 ## Usage
 [step by step instructions]
 
+## Web service
+
+### Authorization
+Make sure that current session is (also) allowed for the web service because the widget will not try to authenticate.
+The service should return a list of data items in the following format:
+
+| Element     | Req.? | Description |
+|-------------|:-:|--|
+| idValueX    | Y | ID value for the X axis |
+| labelValueX |   | Label value for the X axis, ID value will be used if empty |
+| idValueY    | Y | ID value for the Y axis |
+| labelValueY |   | Label value for the Y axis, ID value will be used if empty |
+| value       | ? | Value, required when Cell value action is not Count |
+
+
+
 ## Demo project
 https://testpivottablewebw-sandbox.mxapps.io/
 

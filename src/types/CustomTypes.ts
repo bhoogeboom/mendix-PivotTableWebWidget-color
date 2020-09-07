@@ -7,8 +7,8 @@ export interface AxisKeyData {
 }
 
 export interface TableCellData {
-    keyValueX: string;
-    keyValueY: string;
+    idValueX: string;
+    idValueY: string;
     cellValue: string;
     cellType: TableCellType;
     classes: string;
@@ -25,11 +25,19 @@ export interface TableData {
 export type ModelCellValue = string | Number;
 
 export interface ModelCellData {
-    keyValueX: string;
-    keyValueY: string;
+    idValueX: string;
+    idValueY: string;
     values: ModelCellValue[];
 }
 
 export interface ModelData {
     valueMap: Map<string, ModelCellData>;
+}
+
+export interface InputRow {
+    idValueX: string;
+    labelValueX: string;
+    idValueY: string;
+    labelValueY: string;
+    value: string | Number;
 }
