@@ -1,10 +1,9 @@
 import { Component, ReactNode, createElement } from "react";
-import { hot } from "react-hot-loader/root";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 
 import "./ui/PivotTableWebWidget.css";
 
-class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
+export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
 
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
@@ -25,5 +24,3 @@ class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
         </ul>;
     }
 }
-
-export default hot(PivotTableWebWidget);

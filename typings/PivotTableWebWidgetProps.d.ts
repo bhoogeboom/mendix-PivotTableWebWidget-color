@@ -4,7 +4,7 @@
  * @author Mendix UI Content Team
  */
 import { CSSProperties } from "react";
-import { DynamicValue, EditableValue, ListValue, ObjectItem } from "mendix";
+import { DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
@@ -26,11 +26,11 @@ export interface PivotTableWebWidgetContainerProps {
     dataSourceType: DataSourceTypeEnum;
     ds?: ListValue;
     dataChangeDateAttr: EditableValue<Date>;
-    cellValueAttr?: (item: ObjectItem) => EditableValue<BigJs.Big | Date | string>;
-    xIdAttr?: (item: ObjectItem) => EditableValue<BigJs.Big | Date | string>;
-    xLabelAttr?: (item: ObjectItem) => EditableValue<BigJs.Big | Date | string>;
-    yIdAttr?: (item: ObjectItem) => EditableValue<BigJs.Big | Date | string>;
-    yLabelAttr?: (item: ObjectItem) => EditableValue<BigJs.Big | Date | string>;
+    cellValueAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    xIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    xLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    yIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    yLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForDecimal: number;
