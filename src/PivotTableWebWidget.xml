@@ -30,16 +30,22 @@
                     <enumerationValue key="serviceCall">Service call</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="ds" type="datasource" isList="true" required="false">
-                <caption>Table data</caption>
-                <description>Datasource for the pivot table</description>
-            </property>
             <property key="dataChangeDateAttr" type="attribute">
                 <caption>Data change date</caption>
                 <description>Update the date in your logic to make the widget update the table. (Pluggable widgets are rendered VERY often!)</description>
                 <attributeTypes>
                     <attributeType name="DateTime"/>
                 </attributeTypes>
+            </property>
+
+        </propertyGroup>
+    
+        <!-- Datasouce properties -->
+
+        <propertyGroup caption="Datasource details">
+            <property key="ds" type="datasource" isList="true" required="false">
+                <caption>Table data</caption>
+                <description>Datasource for the pivot table</description>
             </property>
             <property key="cellValueAttr" type="attribute" dataSource="ds" required="false">
                 <caption>Cell value </caption>
@@ -100,6 +106,45 @@
                     <attributeType name="Long"/>
                     <attributeType name="String"/>
                 </attributeTypes>
+            </property>
+
+        </propertyGroup>
+    
+        <!-- Service call properties -->
+
+        <propertyGroup caption="Service call">
+            <property key="xIdDataType" type="enumeration" defaultValue="string">
+                <caption>X-axis type</caption>
+                <description></description>
+                <enumerationValues>
+                    <enumerationValue key="string">String</enumerationValue>
+                    <enumerationValue key="integer">Integer</enumerationValue>
+                    <enumerationValue key="date">Date</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="yIdDataType" type="enumeration" defaultValue="string">
+                <caption>Y-axis type</caption>
+                <description></description>
+                <enumerationValues>
+                    <enumerationValue key="string">String</enumerationValue>
+                    <enumerationValue key="integer">Integer</enumerationValue>
+                    <enumerationValue key="date">Date</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="valueDataType" type="enumeration" defaultValue="string">
+                <caption>Value type</caption>
+                <description></description>
+                <enumerationValues>
+                    <enumerationValue key="string">String</enumerationValue>
+                    <enumerationValue key="integer">Integer</enumerationValue>
+                    <enumerationValue key="decimal">Decimal</enumerationValue>
+                    <enumerationValue key="date">Date</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="serviceUrl" type="expression" required="false">
+                <caption>URL for the service</caption>
+                <description>Only calls to the app backend are supported. So it be in the format /rest/*yourServiceName*</description>
+                <returnType type="String" />
             </property>
 
         </propertyGroup>

@@ -8,6 +8,12 @@ import { DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mend
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
+export type XIdDataTypeEnum = "string" | "integer" | "date";
+
+export type YIdDataTypeEnum = "string" | "integer" | "date";
+
+export type ValueDataTypeEnum = "string" | "integer" | "decimal" | "date";
+
 export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
 
 export type XSortAttrEnum = "label" | "id";
@@ -24,13 +30,17 @@ export interface PivotTableWebWidgetContainerProps {
     style?: CSSProperties;
     tabIndex: number;
     dataSourceType: DataSourceTypeEnum;
-    ds?: ListValue;
     dataChangeDateAttr: EditableValue<Date>;
+    ds?: ListValue;
     cellValueAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     xIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     xLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     yIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     yLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    xIdDataType: XIdDataTypeEnum;
+    yIdDataType: YIdDataTypeEnum;
+    valueDataType: ValueDataTypeEnum;
+    serviceUrl?: DynamicValue<string>;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForDecimal: number;
@@ -52,13 +62,17 @@ export interface PivotTableWebWidgetPreviewProps {
     class: string;
     style: string;
     dataSourceType: DataSourceTypeEnum;
-    ds: {} | null;
     dataChangeDateAttr: string;
+    ds: {} | null;
     cellValueAttr: string;
     xIdAttr: string;
     xLabelAttr: string;
     yIdAttr: string;
     yLabelAttr: string;
+    xIdDataType: XIdDataTypeEnum;
+    yIdDataType: YIdDataTypeEnum;
+    valueDataType: ValueDataTypeEnum;
+    serviceUrl: string;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
     precisionForDecimal: number | null;

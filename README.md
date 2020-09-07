@@ -21,9 +21,15 @@ Especially when using non-persistent entities it is best to use a web service ra
 [step by step instructions]
 
 ## Web service
+The widget can call webservices, which can improve performance, especially for larger datasets. As no Mendix objects are transferred, only JSON, the result will not impact the client state. Combining this with OQL to aggegate your data in the backend can be a great combination.
+
+### Only to the app backend
+The widget will only call services on the app backend. If you wish to use external data, make that service call in your app logic.
 
 ### Authorization
-Make sure that current session is (also) allowed for the web service because the widget will not try to authenticate.
+Make sure that current session is (also) allowed for the web service because the widget will use the current session to authenticate.
+
+### Result
 The service should return a list of data items in the following format:
 
 | Element     | Req.? | Description |
@@ -34,6 +40,7 @@ The service should return a list of data items in the following format:
 | labelValueY |   | Label value for the Y axis, ID value will be used if empty |
 | value       | ? | Value, required when Cell value action is not Count |
 
+The values can either be strings or numbers. As JSON does not know about dates, a date is transmitted as a string, the widget will process it as a date.
 
 
 ## Demo project

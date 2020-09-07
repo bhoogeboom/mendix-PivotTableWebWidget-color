@@ -19,8 +19,13 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         if (!ds || !ds.items || !yIdAttr) {
             return null;
         }
-        return <ul>
-            {ds.items.map((item) => <li id={item.id}>{yIdAttr(item).displayValue}</li>)}
-        </ul>;
+        const className = "PivotDataWidget " + this.props.class;
+        return (
+            <div className={className}>
+                <ul>
+                    {ds.items.map((item) => <li id={item.id}>{yIdAttr(item).displayValue}</li>)}
+                </ul>
+            </div>
+        );
     }
 }
