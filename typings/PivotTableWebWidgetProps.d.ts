@@ -56,6 +56,7 @@ export interface PivotTableWebWidgetContainerProps {
     yLabelDateformat: string;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
+    logToConsole: boolean;
 }
 
 export interface PivotTableWebWidgetPreviewProps {
@@ -88,4 +89,5 @@ export interface PivotTableWebWidgetPreviewProps {
     yLabelDateformat: string;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
+    logToConsole: boolean;
 }

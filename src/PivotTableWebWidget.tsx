@@ -23,7 +23,9 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         const { dataChangeDateAttr, dataSourceType, ds, cellValueAttr, xIdAttr, yIdAttr, serviceUrl } = this.props;
 
         if (dataChangeDateAttr?.status !== ValueStatus.Available) {
-            this.logToConsole("render: dataChangeDateAttr not yet available");
+            if (this.props.logToConsole) {
+                this.logToConsole("render: dataChangeDateAttr not yet available");
+            }
             return null;
         }
         // @TODO Hier nog validatie van de properties inbouwen.
@@ -31,14 +33,18 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             case "datasource":
                 // Do not check for ds status here. If it is loading, we render current data, if any, this prevents flickering.
                 if (!ds?.items || !cellValueAttr || !xIdAttr || !yIdAttr) {
-                    this.logToConsole("render: ds not yet available");
+                    if (this.props.logToConsole) {
+                        this.logToConsole("render: ds not yet available");
+                    }
                     return null;
                 }
                 break;
 
             case "serviceCall":
                 if (serviceUrl?.status !== ValueStatus.Available) {
-                    this.logToConsole("render: service URL not yet available");
+                    if (this.props.logToConsole) {
+                        this.logToConsole("render: service URL not yet available");
+                    }
                     return null;
                 }
                 break;
@@ -47,7 +53,9 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 return null;
         }
 
-        this.logToConsole("render");
+        if (this.props.logToConsole) {
+            this.logToConsole("render");
+        }
 
         this.getData();
 
@@ -60,7 +68,9 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     }
 
     renderTest(): ReactNode[] {
-        this.logToConsole("renderTest");
+        if (this.props.logToConsole) {
+            this.logToConsole("renderTest");
+        }
         const result: ReactNode[] = [];
         this.modelData.valueMap.forEach((value: ModelCellData, key: string) => {
             result.push(this.renderTestValue(value, key));
@@ -81,7 +91,9 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
 
     getData(): void {
         const { dataChangeDateAttr, dataSourceType } = this.props;
-        this.logToConsole("getData");
+        if (this.props.logToConsole) {
+            this.logToConsole("getData");
+        }
 
         // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
         if (
@@ -109,13 +121,17 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     }
 
     getDataFromDatasource(): void {
-        this.logToConsole("getDataFromDatasource start");
+        if (this.props.logToConsole) {
+            this.logToConsole("getDataFromDatasource start");
+        }
         const { ds } = this.props;
         if (!ds?.items) {
             return;
         }
         ds.items.map(item => this.getDataItemFromDatasource(item));
-        this.logToConsole("getDataFromDatasource done");
+        if (this.props.logToConsole) {
+            this.logToConsole("getDataFromDatasource done");
+        }
     }
 
     getDataItemFromDatasource(item: ObjectItem): void {

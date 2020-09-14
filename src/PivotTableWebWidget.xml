@@ -255,7 +255,13 @@
                 </property>
             </propertyGroup>
         </propertyGroup>
-
+    
+        <propertyGroup caption="Advanced">
+            <property key="logToConsole" type="boolean" defaultValue="false">
+                <caption>Console logging</caption>
+                <description>Log widget progress to the console. Useful to get timing on data retrieval etc.</description>
+            </property>
+        </propertyGroup>
 
     </properties>
 </widget>
