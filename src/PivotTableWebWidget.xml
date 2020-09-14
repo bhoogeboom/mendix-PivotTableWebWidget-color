@@ -143,7 +143,7 @@
             </property>
             <property key="serviceUrl" type="expression" required="false">
                 <caption>URL for the service</caption>
-                <description>Only calls to the app backend are supported. So it be in the format /rest/*yourServiceName*</description>
+                <description>Only calls to the app backend are supported. So it must be in the format /rest/*yourServiceName*</description>
                 <returnType type="String" />
             </property>
 

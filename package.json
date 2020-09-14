@@ -26,7 +26,8 @@
     "@types/big.js": "^4.0.5",
     "@types/classnames": "^2.2.4",
     "@types/react": "~16.9.0",
-    "@types/react-dom": "~16.9.0"
+    "@types/react-dom": "~16.9.0",
+    "mendix-client": "^7.15.8"
   },
   "dependencies": {
     "classnames": "^2.2.6",

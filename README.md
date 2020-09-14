@@ -42,6 +42,8 @@ The service should return a list of data items in the following format:
 
 The values can either be strings or numbers. As JSON does not know about dates, a date is transmitted as a string, the widget will process it as a date.
 
+The demo project has an example of the service and mappings.
+
 
 ## Demo project
 https://testpivottablewebw-sandbox.mxapps.io/

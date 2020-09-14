@@ -1,3 +1,4 @@
+/* global mx */
 import { Component, ReactNode, createElement } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
@@ -95,11 +96,17 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             this.logToConsole("getData");
         }
 
-        // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
-        if (
-            this.previousDataChangeDate &&
-            dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()
-        ) {
+        // We need a datachanged attribute value.
+        if (dataChangeDateAttr.value) {
+            // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
+            if (
+                this.previousDataChangeDate &&
+                dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()
+            ) {
+                return;
+            }
+        } else {
+            this.logErrorToConsole("Data changed date is not set");
             return;
         }
 
@@ -116,6 +123,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 break;
 
             case "serviceCall":
+                this.getDataFromService();
                 break;
         }
     }
@@ -125,9 +133,12 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             this.logToConsole("getDataFromDatasource start");
         }
         const { ds } = this.props;
+
+        // Extra check, we know ds.items will be filled at this point but the syntax checker only sees something that can be undefined.
         if (!ds?.items) {
             return;
         }
+
         ds.items.map(item => this.getDataItemFromDatasource(item));
         if (this.props.logToConsole) {
             this.logToConsole("getDataFromDatasource done");
@@ -183,7 +194,101 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         return editableValue.displayValue;
     }
 
+    getDataFromService(): void {
+        const { serviceUrl } = this.props;
+
+        // Extra check, we know url will be filled at this point but the syntax checker only sees something that can be undefined.
+        if (serviceUrl?.status !== ValueStatus.Available) {
+            return;
+        }
+
+        if (this.props.logToConsole) {
+            this.logToConsole("getDataFromService: " + serviceUrl.value);
+        }
+        // Example taken from https://github.com/mendixlabs/charts
+        // You need to include mendix client, see https://www.npmjs.com/package/mendix-client
+        const token = mx.session.getConfig("csrftoken");
+        window
+            .fetch(serviceUrl.value, {
+                credentials: "include",
+                headers: {
+                    "X-Csrf-Token": token,
+                    Accept: "application/json"
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    response.json().then(data => this.processDataFromService(data));
+                } else {
+                    this.logErrorToConsole("Call to URL " + serviceUrl.value + "failed: " + response.statusText);
+                }
+            });
+    }
+
+    processDataFromService(data: any): void {
+        if (this.props.logToConsole) {
+            this.logToConsole("processDataFromService");
+            console.dir(data);
+        }
+        const { valueMap } = this.modelData;
+
+        if (data && data.length) {
+            for (const element of data) {
+                const mapKey: string = element.idValueX + "_" + element.idValueY;
+                const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
+                if (mapValue) {
+                    mapValue.values.push(element.value);
+                } else {
+                    valueMap.set(mapKey, {
+                        idValueX: element.idValueX,
+                        idValueY: element.idValueY,
+                        values: [element.value]
+                    });
+                }
+            }
+        }
+
+        /*
+
+        if (!cellValueAttr || !xIdAttr || !yIdAttr) {
+            return;
+        }
+
+        let modelCellValue: ModelCellValue;
+        if (cellValueAction === "display") {
+            modelCellValue = cellValueAttr(item).displayValue;
+        } else {
+            modelCellValue = this.getModelCellValue(cellValueAttr, item);
+        }
+
+        const xId: ModelCellValue = this.getModelCellValue(xIdAttr, item);
+        const yId: ModelCellValue = this.getModelCellValue(yIdAttr, item);
+
+        const mapKey: string = xId + "_" + yId;
+        const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
+        if (mapValue) {
+            mapValue.values.push(modelCellValue);
+        } else {
+            valueMap.set(mapKey, {
+                idValueX: xId,
+                idValueY: yId,
+                values: [modelCellValue]
+            });
+        }
+
+ */
+
+        // Change the state to force render.
+        this.setState({
+            lastServiceDataUpdate: new Date()
+        });
+    }
+
     logToConsole(message: string): void {
         console.info(this.props.name + new Date().toISOString() + " " + message);
+    }
+
+    logErrorToConsole(message: string): void {
+        console.error(this.props.name + new Date().toISOString() + " " + message);
     }
 }
