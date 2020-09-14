@@ -19,7 +19,7 @@
     </icon>
     <properties>
     
-        <!-- Datasouce properties -->
+        <!-- Datasource properties -->
 
         <propertyGroup caption="Datasource">
             <property key="dataSourceType" type="enumeration" defaultValue="datasource">
@@ -40,7 +40,7 @@
 
         </propertyGroup>
     
-        <!-- Datasouce properties -->
+        <!-- Datasource details -->
 
         <propertyGroup caption="Datasource details">
             <property key="ds" type="datasource" isList="true" required="false">

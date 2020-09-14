@@ -1,4 +1,3 @@
-
 export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" | "ColumnTotal" | "ExportButton";
 
 export interface AxisKeyData {
@@ -22,11 +21,11 @@ export interface TableData {
     rows: TableRowData[];
 }
 
-export type ModelCellValue = string | Number;
+export type ModelCellValue = string | number;
 
 export interface ModelCellData {
-    idValueX: string;
-    idValueY: string;
+    idValueX: ModelCellValue;
+    idValueY: ModelCellValue;
     values: ModelCellValue[];
 }
 
@@ -39,5 +38,5 @@ export interface InputRow {
     labelValueX: string;
     idValueY: string;
     labelValueY: string;
-    value: string | Number;
+    value: string | number;
 }
