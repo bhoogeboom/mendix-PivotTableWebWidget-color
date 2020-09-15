@@ -64,7 +64,6 @@
                 <description>The attribute used for grouping the data on the X-axis.</description>
                 <attributeTypes>
                     <attributeType name="AutoNumber"/>
-                    <attributeType name="DateTime"/>
                     <attributeType name="Enum"/>
                     <attributeType name="Integer"/>
                     <attributeType name="Long"/>
@@ -76,7 +75,6 @@
                 <description>The attribute used as column heading.</description>
                 <attributeTypes>
                     <attributeType name="AutoNumber"/>
-                    <attributeType name="DateTime"/>
                     <attributeType name="Enum"/>
                     <attributeType name="Integer"/>
                     <attributeType name="Long"/>
@@ -100,7 +98,6 @@
                 <description>The attribute used as row label.</description>
                 <attributeTypes>
                     <attributeType name="AutoNumber"/>
-                    <attributeType name="DateTime"/>
                     <attributeType name="Enum"/>
                     <attributeType name="Integer"/>
                     <attributeType name="Long"/>
@@ -119,7 +116,6 @@
                 <enumerationValues>
                     <enumerationValue key="string">String</enumerationValue>
                     <enumerationValue key="integer">Integer</enumerationValue>
-                    <enumerationValue key="date">Date</enumerationValue>
                 </enumerationValues>
             </property>
             <property key="yIdDataType" type="enumeration" defaultValue="string">
@@ -128,12 +124,11 @@
                 <enumerationValues>
                     <enumerationValue key="string">String</enumerationValue>
                     <enumerationValue key="integer">Integer</enumerationValue>
-                    <enumerationValue key="date">Date</enumerationValue>
                 </enumerationValues>
             </property>
             <property key="valueDataType" type="enumeration" defaultValue="string">
                 <caption>Value type</caption>
-                <description></description>
+                <description>For type date, the value is a string which will be parsed into a date: 2020-09-15T09:53:56.771Z</description>
                 <enumerationValues>
                     <enumerationValue key="string">String</enumerationValue>
                     <enumerationValue key="integer">Integer</enumerationValue>
@@ -208,10 +203,6 @@
             <!-- X-axis properties -->
 
             <propertyGroup caption="X-axis">
-                <property key="xLabelDateformat" type="string" defaultValue="dd-MM-yyyy">
-                    <caption>X-axis date format</caption>
-                    <description>X-axis date format, applicable for date/time only</description>
-                </property>
                 <property key="xSortAttr" type="enumeration" defaultValue="label">
                     <caption>X-axis sort attribute</caption>
                     <description>The attribute used for sorting the data on the X-axis. Defaults to label attribute</description>
@@ -233,10 +224,6 @@
             <!-- Y-axis properties -->
 
             <propertyGroup caption="Y-axis">
-                <property key="yLabelDateformat" type="string" defaultValue="dd-MM-yyyy">
-                    <caption>Y-axis date format</caption>
-                    <description>Y-axis date format, applicable for date/time only</description>
-                </property>
                 <property key="ySortAttr" type="enumeration" defaultValue="label">
                     <caption>Y-axis sort attribute</caption>
                     <description>The attribute used for sorting the data on the Y-axis. Defaults to label attribute</description>

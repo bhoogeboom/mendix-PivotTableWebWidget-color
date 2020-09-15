@@ -8,9 +8,9 @@ import { DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mend
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
-export type XIdDataTypeEnum = "string" | "integer" | "date";
+export type XIdDataTypeEnum = "string" | "integer";
 
-export type YIdDataTypeEnum = "string" | "integer" | "date";
+export type YIdDataTypeEnum = "string" | "integer";
 
 export type ValueDataTypeEnum = "string" | "integer" | "decimal" | "date";
 
@@ -33,10 +33,10 @@ export interface PivotTableWebWidgetContainerProps {
     dataChangeDateAttr: EditableValue<Date>;
     ds?: ListValue;
     cellValueAttr?: ListAttributeValue<BigJs.Big | Date | string>;
-    xIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
-    xLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    xIdAttr?: ListAttributeValue<BigJs.Big | string>;
+    xLabelAttr?: ListAttributeValue<BigJs.Big | string>;
     yIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
-    yLabelAttr?: ListAttributeValue<BigJs.Big | Date | string>;
+    yLabelAttr?: ListAttributeValue<BigJs.Big | string>;
     xIdDataType: XIdDataTypeEnum;
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
@@ -50,10 +50,8 @@ export interface PivotTableWebWidgetContainerProps {
     showTotalRow: boolean;
     totalRowLabel?: DynamicValue<string>;
     noDataText: DynamicValue<string>;
-    xLabelDateformat: string;
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
-    yLabelDateformat: string;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
     logToConsole: boolean;
@@ -83,10 +81,8 @@ export interface PivotTableWebWidgetPreviewProps {
     showTotalRow: boolean;
     totalRowLabel: string;
     noDataText: string;
-    xLabelDateformat: string;
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
-    yLabelDateformat: string;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
     logToConsole: boolean;

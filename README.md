@@ -40,7 +40,9 @@ The service should return a list of data items in the following format:
 | labelValueY |   | Label value for the Y axis, ID value will be used if empty |
 | value       | ? | Value, required when Cell value action is not Count |
 
-The values can either be strings or numbers. As JSON does not know about dates, a date is transmitted as a string, the widget will process it as a date.
+The values can either be strings or numbers. As JSON does not know about dates, a date is to be transmitted as UTC date string, format: 2020-09-15T09:53:56.771Z, the widget will process it as a date.
+
+For ID values, it is best to format the dates in the backend as aggregation usually takes place on an entire month or year. The key is then yyyyMM or just yyyy.
 
 The demo project has an example of the service and mappings.
 
