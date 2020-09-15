@@ -1,4 +1,4 @@
-import { ModelCellValue, ModelData, ModelCellData } from "../types/CustomTypes";
+import { ModelCellValue, ModelData, ModelCellData, ErrorArray } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
@@ -13,12 +13,58 @@ export default class Data {
         this._widgetName = widgetName;
     }
 
+    validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
+        const { dataSourceType } = widgetProps;
+
+        switch (dataSourceType) {
+            case "datasource":
+                return this.validateDatasourceProps(widgetProps);
+
+            case "serviceCall":
+                return this.validateServiceProps(widgetProps);
+        }
+    }
+
+    private validateDatasourceProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
+        const { ds, cellValueAction, cellValueAttr, xIdAttr, yIdAttr } = widgetProps;
+
+        const result: ErrorArray = [];
+
+        if (!ds) {
+            result.push("Datasource not configured");
+        }
+        if (!cellValueAttr && cellValueAction !== "count") {
+            result.push("Cell value not set");
+        }
+        if (!xIdAttr) {
+            result.push("X-axis ID not set");
+        }
+        if (!yIdAttr) {
+            result.push("Y-axis ID not set");
+        }
+
+        return result;
+    }
+
+    private validateServiceProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
+        const { serviceUrl } = widgetProps;
+
+        const result: ErrorArray = [];
+
+        if (!serviceUrl) {
+            result.push("Service URL not set");
+        }
+
+        return result;
+    }
+
     getDataFromDatasource(widgetProps: PivotTableWebWidgetContainerProps): void {
         if (widgetProps.logToConsole) {
             this.logToConsole("getDataFromDatasource start");
         }
 
         this._modelData.valueMap.clear();
+
         const { ds } = widgetProps;
 
         // Extra check, we know ds.items will be filled at this point but the syntax checker only sees something that can be undefined.
@@ -28,7 +74,7 @@ export default class Data {
 
         ds.items.map(item => this.getDataItemFromDatasource(item, widgetProps));
         if (widgetProps.logToConsole) {
-            this.logToConsole("getDataFromDatasource done");
+            this.logToConsole("getDataFromDatasource end");
         }
     }
 
@@ -36,19 +82,27 @@ export default class Data {
         const { cellValueAction, cellValueAttr, xIdAttr, yIdAttr } = widgetProps;
         const { valueMap } = this.modelData;
 
-        if (!cellValueAttr || !xIdAttr || !yIdAttr) {
+        if (!xIdAttr || !yIdAttr) {
             return;
         }
 
         let modelCellValue: ModelCellValue;
-        if (cellValueAction === "display") {
-            modelCellValue = cellValueAttr(item).displayValue;
-        } else {
-            modelCellValue = this.getModelCellValue(cellValueAttr, item);
+        switch (cellValueAction) {
+            case "count":
+                modelCellValue = "NA"; // For count the cell value is not relevant and need not be available
+                break;
+
+            case "display":
+                modelCellValue = cellValueAttr ? cellValueAttr(item).displayValue : "*null*";
+                break;
+
+            default:
+                modelCellValue = this.getModelCellValue(item, cellValueAttr);
+                break;
         }
 
-        const xId: ModelCellValue = this.getModelCellValue(xIdAttr, item);
-        const yId: ModelCellValue = this.getModelCellValue(yIdAttr, item);
+        const xId: ModelCellValue = this.getModelCellValue(item, xIdAttr);
+        const yId: ModelCellValue = this.getModelCellValue(item, yIdAttr);
 
         const mapKey: string = xId + "_" + yId;
         const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
@@ -63,7 +117,10 @@ export default class Data {
         }
     }
 
-    private getModelCellValue(attr: ListAttributeValue<Big | Date | string>, item: ObjectItem): ModelCellValue {
+    private getModelCellValue(item: ObjectItem, attr?: ListAttributeValue<Big | Date | string>, ): ModelCellValue {
+        if (!attr) {
+            return "*null*";
+        }
         const editableValue = attr(item);
         const value = editableValue.value;
 
@@ -92,6 +149,9 @@ export default class Data {
             if (logToConsole) {
                 this.logToConsole("getDataFromService: " + serviceUrl.value);
             }
+
+            this._modelData.valueMap.clear();
+
             // Example taken from https://github.com/mendixlabs/charts
             // You need to include mendix client, see https://www.npmjs.com/package/mendix-client
             const token = mx.session.getConfig("csrftoken");
@@ -123,19 +183,21 @@ export default class Data {
             this.logToConsole("processDataFromService");
             console.dir(data);
         }
+        const { cellValueAction } = widgetProps;
         const { valueMap } = this._modelData;
 
         if (data && data.length) {
             for (const element of data) {
                 const mapKey: string = element.idValueX + "_" + element.idValueY;
                 const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
+                const modelCellValue: ModelCellValue = cellValueAction === "count" ? "NA" : element.value;
                 if (mapValue) {
-                    mapValue.values.push(element.value);
+                    mapValue.values.push(modelCellValue);
                 } else {
                     valueMap.set(mapKey, {
                         idValueX: element.idValueX,
                         idValueY: element.idValueY,
-                        values: [element.value]
+                        values: [modelCellValue]
                     });
                 }
             }

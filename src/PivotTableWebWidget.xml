@@ -48,7 +48,7 @@
                 <description>Datasource for the pivot table</description>
             </property>
             <property key="cellValueAttr" type="attribute" dataSource="ds" required="false">
-                <caption>Cell value </caption>
+                <caption>Cell value</caption>
                 <description>The attribute used as cell value. Not necessary for cell value action count. All other actions are performed on this attribute</description>
                 <attributeTypes>
                     <attributeType name="Decimal"/>
@@ -84,7 +84,7 @@
                 </attributeTypes>
             </property>
             <property key="yIdAttr" type="attribute" dataSource="ds" required="false">
-                <caption>Y-axis ID </caption>
+                <caption>Y-axis ID</caption>
                 <description>The attribute used for grouping the data on the Y-axis.</description>
                 <attributeTypes>
                     <attributeType name="AutoNumber"/>

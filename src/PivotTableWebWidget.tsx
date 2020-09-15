@@ -1,7 +1,7 @@
 import { Component, ReactNode, createElement } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 import { ValueStatus } from "mendix";
-import { ModelCellData } from "./types/CustomTypes";
+import { ErrorArray, ModelCellData } from "./types/CustomTypes";
 // import { TableData } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
@@ -10,16 +10,22 @@ import Data from "./classes/Data";
 export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
     private previousDataChangeDate?: Date = undefined;
     private data: Data;
+    private errorArray: ErrorArray;
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
         this.data = new Data(props.name);
+        this.errorArray = this.data.validateProps(props);
         this.state = {
             lastServiceDataUpdate: undefined
         };
     }
 
     render(): ReactNode {
-        const { dataChangeDateAttr, dataSourceType, ds, cellValueAttr, xIdAttr, yIdAttr, serviceUrl } = this.props;
+        const { dataChangeDateAttr, dataSourceType, ds, serviceUrl } = this.props;
+
+        if (this.errorArray.length > 0) {
+            return this.renderErrors();
+        }
 
         if (dataChangeDateAttr?.status !== ValueStatus.Available) {
             if (this.props.logToConsole) {
@@ -27,11 +33,10 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             }
             return null;
         }
-        // @TODO Hier nog validatie van de properties inbouwen. Validatie in Data class zetten en hier aanroepen
         switch (dataSourceType) {
             case "datasource":
                 // Do not check for ds status here. If it is loading, we render current data, if any, this prevents flickering.
-                if (!ds?.items || !cellValueAttr || !xIdAttr || !yIdAttr) {
+                if (!ds?.items) {
                     if (this.props.logToConsole) {
                         this.logToConsole("render: ds not yet available");
                     }
@@ -62,6 +67,24 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         return (
             <div className={className}>
                 <ul>{this.renderTest()}</ul>
+            </div>
+        );
+    }
+
+    renderErrors(): ReactNode {
+        if (this.props.logToConsole) {
+            this.logToConsole("renderErrors");
+        }
+
+        const className = "PivotDataWidget configurationErrors";
+        return (
+            <div className={className}>
+                <h3>Pivot table widget {this.props.name} has configuration errors</h3>
+                <ul className="errorList">
+                    {this.errorArray.map((item: string, index) => {
+                        return <li key={index}>{item}</li>;
+                    })}
+                </ul>
             </div>
         );
     }
@@ -111,9 +134,6 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         // Store the date, also prevents multiple renders all triggering reload of the data.
         this.previousDataChangeDate = dataChangeDateAttr.value;
 
-        // Clear the model;
-        this.data.modelData.valueMap.clear();
-
         // Load the data
         switch (dataSourceType) {
             case "datasource":
@@ -121,19 +141,23 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 break;
 
             case "serviceCall":
-                this.data.getDataFromService(this.props).then(() => {
-                    if (this.props.logToConsole) {
-                        this.logToConsole("getData: Change the state to force render.");
-                    }
-                    this.setState({
-                        lastServiceDataUpdate: new Date()
-                    });
-                });
+                this.getDataFromService();
                 break;
         }
         if (this.props.logToConsole) {
             this.logToConsole("getData end");
         }
+    }
+
+    getDataFromService(): void {
+        this.data.getDataFromService(this.props).then(() => {
+            if (this.props.logToConsole) {
+                this.logToConsole("getData: Change the state to force render.");
+            }
+            this.setState({
+                lastServiceDataUpdate: new Date()
+            });
+        });
     }
 
     logToConsole(message: string): void {

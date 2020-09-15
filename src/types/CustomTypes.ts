@@ -40,3 +40,5 @@ export interface InputRow {
     labelValueY: string;
     value: string | number;
 }
+
+export type ErrorArray = string[];
