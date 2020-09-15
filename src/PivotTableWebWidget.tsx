@@ -1,20 +1,18 @@
-/* global mx */
 import { Component, ReactNode, createElement } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
-import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
-import { ModelCellValue, ModelData, ModelCellData } from "./types/CustomTypes";
-import { Big } from "big.js";
+import { ValueStatus } from "mendix";
+import { ModelCellData } from "./types/CustomTypes";
 // import { TableData } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
+import Data from "./classes/Data";
 
 export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
     private previousDataChangeDate?: Date = undefined;
-    private modelData: ModelData = {
-        valueMap: new Map<string, ModelCellData>()
-    };
+    private data: Data;
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
+        this.data = new Data(props.name);
         this.state = {
             lastServiceDataUpdate: undefined
         };
@@ -29,7 +27,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             }
             return null;
         }
-        // @TODO Hier nog validatie van de properties inbouwen.
+        // @TODO Hier nog validatie van de properties inbouwen. Validatie in Data class zetten en hier aanroepen
         switch (dataSourceType) {
             case "datasource":
                 // Do not check for ds status here. If it is loading, we render current data, if any, this prevents flickering.
@@ -73,7 +71,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             this.logToConsole("renderTest");
         }
         const result: ReactNode[] = [];
-        this.modelData.valueMap.forEach((value: ModelCellData, key: string) => {
+        this.data.modelData.valueMap.forEach((value: ModelCellData, key: string) => {
             result.push(this.renderTestValue(value, key));
         }, this);
 
@@ -114,174 +112,28 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         this.previousDataChangeDate = dataChangeDateAttr.value;
 
         // Clear the model;
-        this.modelData.valueMap.clear();
+        this.data.modelData.valueMap.clear();
 
         // Load the data
         switch (dataSourceType) {
             case "datasource":
-                this.getDataFromDatasource();
+                this.data.getDataFromDatasource(this.props);
                 break;
 
             case "serviceCall":
-                this.getDataFromService();
+                this.data.getDataFromService(this.props).then(() => {
+                    if (this.props.logToConsole) {
+                        this.logToConsole("getData: Change the state to force render.");
+                    }
+                    this.setState({
+                        lastServiceDataUpdate: new Date()
+                    });
+                });
                 break;
         }
-    }
-
-    getDataFromDatasource(): void {
         if (this.props.logToConsole) {
-            this.logToConsole("getDataFromDatasource start");
+            this.logToConsole("getData end");
         }
-        const { ds } = this.props;
-
-        // Extra check, we know ds.items will be filled at this point but the syntax checker only sees something that can be undefined.
-        if (!ds?.items) {
-            return;
-        }
-
-        ds.items.map(item => this.getDataItemFromDatasource(item));
-        if (this.props.logToConsole) {
-            this.logToConsole("getDataFromDatasource done");
-        }
-    }
-
-    getDataItemFromDatasource(item: ObjectItem): void {
-        const { cellValueAction, cellValueAttr, xIdAttr, yIdAttr } = this.props;
-        const { valueMap } = this.modelData;
-
-        if (!cellValueAttr || !xIdAttr || !yIdAttr) {
-            return;
-        }
-
-        let modelCellValue: ModelCellValue;
-        if (cellValueAction === "display") {
-            modelCellValue = cellValueAttr(item).displayValue;
-        } else {
-            modelCellValue = this.getModelCellValue(cellValueAttr, item);
-        }
-
-        const xId: ModelCellValue = this.getModelCellValue(xIdAttr, item);
-        const yId: ModelCellValue = this.getModelCellValue(yIdAttr, item);
-
-        const mapKey: string = xId + "_" + yId;
-        const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
-        if (mapValue) {
-            mapValue.values.push(modelCellValue);
-        } else {
-            valueMap.set(mapKey, {
-                idValueX: xId,
-                idValueY: yId,
-                values: [modelCellValue]
-            });
-        }
-    }
-
-    getModelCellValue(attr: ListAttributeValue<Big | Date | string>, item: ObjectItem): ModelCellValue {
-        const editableValue = attr(item);
-        const value = editableValue.value;
-
-        // Date
-        if (value instanceof Date) {
-            return value.getTime();
-        }
-
-        // Numeric
-        if (value instanceof Big) {
-            return Number(value);
-        }
-
-        // String
-        return editableValue.displayValue;
-    }
-
-    getDataFromService(): void {
-        const { serviceUrl } = this.props;
-
-        // Extra check, we know url will be filled at this point but the syntax checker only sees something that can be undefined.
-        if (serviceUrl?.status !== ValueStatus.Available) {
-            return;
-        }
-
-        if (this.props.logToConsole) {
-            this.logToConsole("getDataFromService: " + serviceUrl.value);
-        }
-        // Example taken from https://github.com/mendixlabs/charts
-        // You need to include mendix client, see https://www.npmjs.com/package/mendix-client
-        const token = mx.session.getConfig("csrftoken");
-        window
-            .fetch(serviceUrl.value, {
-                credentials: "include",
-                headers: {
-                    "X-Csrf-Token": token,
-                    Accept: "application/json"
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    response.json().then(data => this.processDataFromService(data));
-                } else {
-                    this.logErrorToConsole("Call to URL " + serviceUrl.value + "failed: " + response.statusText);
-                }
-            });
-    }
-
-    processDataFromService(data: any): void {
-        if (this.props.logToConsole) {
-            this.logToConsole("processDataFromService");
-            console.dir(data);
-        }
-        const { valueMap } = this.modelData;
-
-        if (data && data.length) {
-            for (const element of data) {
-                const mapKey: string = element.idValueX + "_" + element.idValueY;
-                const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
-                if (mapValue) {
-                    mapValue.values.push(element.value);
-                } else {
-                    valueMap.set(mapKey, {
-                        idValueX: element.idValueX,
-                        idValueY: element.idValueY,
-                        values: [element.value]
-                    });
-                }
-            }
-        }
-
-        /*
-
-        if (!cellValueAttr || !xIdAttr || !yIdAttr) {
-            return;
-        }
-
-        let modelCellValue: ModelCellValue;
-        if (cellValueAction === "display") {
-            modelCellValue = cellValueAttr(item).displayValue;
-        } else {
-            modelCellValue = this.getModelCellValue(cellValueAttr, item);
-        }
-
-        const xId: ModelCellValue = this.getModelCellValue(xIdAttr, item);
-        const yId: ModelCellValue = this.getModelCellValue(yIdAttr, item);
-
-        const mapKey: string = xId + "_" + yId;
-        const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
-        if (mapValue) {
-            mapValue.values.push(modelCellValue);
-        } else {
-            valueMap.set(mapKey, {
-                idValueX: xId,
-                idValueY: yId,
-                values: [modelCellValue]
-            });
-        }
-
- */
-
-        // Change the state to force render.
-        this.setState({
-            lastServiceDataUpdate: new Date()
-        });
     }
 
     logToConsole(message: string): void {
