@@ -242,7 +242,7 @@
                 </property>
             </propertyGroup>
         </propertyGroup>
-    
+
         <propertyGroup caption="Advanced">
             <property key="logToConsole" type="boolean" defaultValue="false">
                 <caption>Console logging</caption>

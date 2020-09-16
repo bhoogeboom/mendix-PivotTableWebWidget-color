@@ -1,7 +1,7 @@
 import { Component, ReactNode, createElement } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 import { ValueStatus } from "mendix";
-import { ErrorArray, ModelCellData } from "./types/CustomTypes";
+import { ErrorArray, TableCellData, TableRowData } from "./types/CustomTypes";
 // import { TableData } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
@@ -13,7 +13,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     private errorArray: ErrorArray;
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
-        this.data = new Data(props.name);
+        this.data = new Data(props.name, props.logToConsole);
         this.errorArray = this.data.validateProps(props);
         this.state = {
             lastServiceDataUpdate: undefined
@@ -29,7 +29,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
 
         if (dataChangeDateAttr?.status !== ValueStatus.Available) {
             if (this.props.logToConsole) {
-                this.logToConsole("render: dataChangeDateAttr not yet available");
+                this.logMessageToConsole("render: dataChangeDateAttr not yet available");
             }
             return null;
         }
@@ -38,7 +38,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 // Do not check for ds status here. If it is loading, we render current data, if any, this prevents flickering.
                 if (!ds?.items) {
                     if (this.props.logToConsole) {
-                        this.logToConsole("render: ds not yet available");
+                        this.logMessageToConsole("render: ds not yet available");
                     }
                     return null;
                 }
@@ -47,7 +47,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             case "serviceCall":
                 if (serviceUrl?.status !== ValueStatus.Available) {
                     if (this.props.logToConsole) {
-                        this.logToConsole("render: service URL not yet available");
+                        this.logMessageToConsole("render: service URL not yet available");
                     }
                     return null;
                 }
@@ -58,22 +58,17 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         }
 
         if (this.props.logToConsole) {
-            this.logToConsole("render");
+            this.logMessageToConsole("render");
         }
 
         this.getData();
 
-        const className = "PivotDataWidget " + this.props.class;
-        return (
-            <div className={className}>
-                <ul>{this.renderTest()}</ul>
-            </div>
-        );
+        return this.renderTable();
     }
 
     renderErrors(): ReactNode {
         if (this.props.logToConsole) {
-            this.logToConsole("renderErrors");
+            this.logMessageToConsole("renderErrors");
         }
 
         const className = "PivotDataWidget configurationErrors";
@@ -89,41 +84,67 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         );
     }
 
-    renderTest(): ReactNode[] {
+    renderTable(): ReactNode {
         if (this.props.logToConsole) {
-            this.logToConsole("renderTest");
+            this.logMessageToConsole("renderTable");
         }
-        const result: ReactNode[] = [];
-        this.data.modelData.valueMap.forEach((value: ModelCellData, key: string) => {
-            result.push(this.renderTestValue(value, key));
-        }, this);
 
-        return result;
+        const { tableData } = this.data.modelData;
+        const className = "PivotDataWidget " + this.props.class;
+        return (
+            <div className={className}>
+                <table>
+                    <thead>
+                        <tr>{tableData.headerRow.cells.map(item => this.renderCell(item))}</tr>
+                    </thead>
+                    <tbody>{tableData.bodyRows.map(item => this.renderTableRow(item))}</tbody>
+                </table>
+            </div>
+        );
     }
 
-    renderTestValue(value: ModelCellData, key: string): ReactNode {
-        return (
-            <li key={key} id={key}>
-                <span>
-                    {value.idValueX} - {value.idValueY} : {value.values.length}
-                </span>
-            </li>
-        );
+    renderTableRow(rowData: TableRowData): ReactNode {
+        const rowKey = "tr_" + rowData.cells[0].idValueY;
+        return <tr key={rowKey}>{rowData.cells.map(item => this.renderCell(item))}</tr>;
+    }
+
+    renderCell(cell: TableCellData): ReactNode {
+        switch (cell.cellType) {
+            case "ColumnHeader":
+                const colKey = "x_" + cell.idValueX;
+                return (
+                    <th key={colKey} className={cell.classes}>
+                        {cell.cellValue}
+                    </th>
+                );
+            case "RowHeader":
+                const rowKey = "y_" + cell.idValueY;
+                return (
+                    <th key={rowKey} className={cell.classes}>
+                        {cell.cellValue}
+                    </th>
+                );
+
+            default:
+                const cellKey = "c_" + cell.idValueY + cell.idValueX;
+                return (
+                    <td key={cellKey} className={cell.classes}>
+                        {cell.cellValue}
+                    </td>
+                );
+        }
     }
 
     getData(): void {
         const { dataChangeDateAttr, dataSourceType } = this.props;
         if (this.props.logToConsole) {
-            this.logToConsole("getData");
+            this.logMessageToConsole("getData");
         }
 
         // We need a datachanged attribute value.
         if (dataChangeDateAttr.value) {
             // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
-            if (
-                this.previousDataChangeDate &&
-                dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()
-            ) {
+            if (this.previousDataChangeDate && dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()) {
                 return;
             }
         } else {
@@ -145,14 +166,14 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 break;
         }
         if (this.props.logToConsole) {
-            this.logToConsole("getData end");
+            this.logMessageToConsole("getData end");
         }
     }
 
     getDataFromService(): void {
         this.data.getDataFromService(this.props).then(() => {
             if (this.props.logToConsole) {
-                this.logToConsole("getData: Change the state to force render.");
+                this.logMessageToConsole("getData: Change the state to force render.");
             }
             this.setState({
                 lastServiceDataUpdate: new Date()
@@ -160,7 +181,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         });
     }
 
-    logToConsole(message: string): void {
+    logMessageToConsole(message: string): void {
         console.info(this.props.name + new Date().toISOString() + " " + message);
     }
 

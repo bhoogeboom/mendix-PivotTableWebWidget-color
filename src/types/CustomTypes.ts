@@ -1,15 +1,15 @@
-export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" | "ColumnTotal" | "ExportButton";
+export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" | "ColumnTotal" | "ExportButton" | "Empty";
 
 export type AxisSortType = "string" | "number" | undefined;
 
 export type AxisMap = Map<ModelCellValue, AxisKeyData>;
 
 export interface TableCellData {
-    idValueX: string;
-    idValueY: string;
-    cellValue: string;
     cellType: TableCellType;
-    classes: string;
+    idValueX?: string;
+    idValueY?: string;
+    cellValue?: string;
+    classes?: string;
 }
 
 export interface TableRowData {
@@ -17,7 +17,9 @@ export interface TableRowData {
 }
 
 export interface TableData {
-    rows: TableRowData[];
+    headerRow: TableRowData;
+    bodyRows: TableRowData[];
+    footerRow?: TableRowData;
 }
 
 export type ModelCellValue = string | number;
@@ -37,8 +39,9 @@ export interface ModelData {
     valueMap: Map<string, ModelCellData>;
     xAxisMap: AxisMap;
     yAxisMap: AxisMap;
-    xAxisArray?: AxisKeyData[];
-    yAxisArray?: AxisKeyData[];
+    xAxisArray: AxisKeyData[];
+    yAxisArray: AxisKeyData[];
+    tableData: TableData;
 }
 
 export interface InputRow {

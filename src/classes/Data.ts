@@ -1,20 +1,32 @@
-import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData } from "../types/CustomTypes";
+import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
 
 export default class Data {
+    private CLASS_HEADER_COL = "pivotTableColumnHeader";
+    private CLASS_HEADER_ROW = "pivotTableRowHeader";
+    private CLASS_CELL = "pivotTableCell";
+    private CLASS_CELL_EMPTY = "pivotTableCellEmpty";
     private _widgetName: string;
+    private _logToConsole: boolean;
     private _xAxisSortType: AxisSortType = undefined;
     private _yAxisSortType: AxisSortType = undefined;
     private _modelData: ModelData = {
         valueMap: new Map<string, ModelCellData>(),
+        xAxisArray: [],
+        yAxisArray: [],
         xAxisMap: new Map<ModelCellValue, AxisKeyData>(),
-        yAxisMap: new Map<ModelCellValue, AxisKeyData>()
+        yAxisMap: new Map<ModelCellValue, AxisKeyData>(),
+        tableData: {
+            headerRow: { cells: [] },
+            bodyRows: []
+        }
     };
 
-    constructor(widgetName: string) {
+    constructor(widgetName: string, logToConsole: boolean) {
         this._widgetName = widgetName;
+        this._logToConsole = logToConsole;
     }
 
     validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
@@ -73,8 +85,8 @@ export default class Data {
     }
 
     getDataFromDatasource(widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (widgetProps.logToConsole) {
-            this.logToConsole("getDataFromDatasource start");
+        if (this._logToConsole) {
+            this.logMessageToConsole("getDataFromDatasource start");
         }
 
         this.clearData();
@@ -93,8 +105,8 @@ export default class Data {
         this.createTableData(widgetProps);
 
         // Done
-        if (widgetProps.logToConsole) {
-            this.logToConsole("getDataFromDatasource end, _xAxisSortType: " + this._xAxisSortType + ", _yAxisSortType: " + this._yAxisSortType);
+        if (this._logToConsole) {
+            this.logMessageToConsole("getDataFromDatasource end, _xAxisSortType: " + this._xAxisSortType + ", _yAxisSortType: " + this._yAxisSortType);
         }
     }
 
@@ -193,7 +205,7 @@ export default class Data {
             }
 
             if (logToConsole) {
-                this.logToConsole("getDataFromService: " + serviceUrl.value);
+                this.logMessageToConsole("getDataFromService: " + serviceUrl.value);
             }
 
             this.clearData();
@@ -227,8 +239,8 @@ export default class Data {
     }
 
     private processDataFromService(data: any, widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (widgetProps.logToConsole) {
-            this.logToConsole("processDataFromService");
+        if (this._logToConsole) {
+            this.logMessageToConsole("processDataFromService");
             console.dir(data);
         }
         const { cellValueAction } = widgetProps;
@@ -274,18 +286,105 @@ export default class Data {
     }
 
     private createTableData(widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (widgetProps.logToConsole) {
-            this.logToConsole("createTableData");
+        if (this._logToConsole) {
+            this.logMessageToConsole("createTableData");
         }
 
         // Create arrays from the axis maps in the requested order
         this.createAxisArrays(widgetProps);
+
+        this.createHeaderRow();
+
+        this.createBodyRows();
     }
 
     private createAxisArrays(widgetProps: PivotTableWebWidgetContainerProps): void {
         const { xSortAttr, ySortAttr } = widgetProps;
         this.modelData.xAxisArray = this.createAxisArray(xSortAttr, this._xAxisSortType, this.modelData.xAxisMap);
         this.modelData.yAxisArray = this.createAxisArray(ySortAttr, this._yAxisSortType, this.modelData.yAxisMap);
+    }
+
+    private createHeaderRow(): void {
+        if (this._logToConsole) {
+            this.logMessageToConsole("createHeaderRow");
+        }
+
+        const { xAxisArray } = this._modelData;
+        const { headerRow } = this._modelData.tableData;
+
+        // Create the header cell array from the X axis labels
+        headerRow.cells = xAxisArray.map(xAxisKey => {
+            const cell: TableCellData = {
+                cellType: "ColumnHeader",
+                cellValue: xAxisKey.labelValue,
+                idValueX: "" + xAxisKey.idValue,
+                classes: this.CLASS_HEADER_COL
+            };
+            return cell;
+        });
+
+        // Place top left cell at first position, can contain export button
+        headerRow.cells.unshift(this.createTopLeftCell());
+    }
+
+    private createTopLeftCell(): TableCellData {
+        if (this._logToConsole) {
+            this.logMessageToConsole("createTopLeftCell");
+        }
+
+        const cell: TableCellData = { cellType: "Empty" };
+
+        // When the export function is added, the cell will contain the export button.
+
+        return cell;
+    }
+
+    private createBodyRows(): void {
+        if (this._logToConsole) {
+            this.logMessageToConsole("createBodyRows");
+        }
+
+        const { yAxisArray, tableData } = this._modelData;
+        tableData.bodyRows = yAxisArray.map(item => this.createBodyRow(item));
+    }
+
+    private createBodyRow(yAxisKey: AxisKeyData): TableRowData {
+        const { xAxisArray } = this._modelData;
+
+        // Create the header cell array from the X axis labels
+        const cells = xAxisArray.map(xAxisKey => this.createTableCell(xAxisKey, yAxisKey));
+
+        cells.unshift({
+            cellType: "RowHeader",
+            cellValue: yAxisKey.labelValue,
+            idValueY: "" + yAxisKey.idValue,
+            classes: this.CLASS_HEADER_ROW
+        });
+
+        const row: TableRowData = { cells };
+        return row;
+    }
+
+    private createTableCell(xAxisKey: AxisKeyData, yAxisKey: AxisKeyData): TableCellData {
+        const { valueMap } = this._modelData;
+
+        const cell: TableCellData = {
+            cellType: "Value",
+            idValueX: "" + xAxisKey.idValue,
+            idValueY: "" + yAxisKey.idValue
+        };
+
+        const mapKey: string = xAxisKey.idValue + "_" + yAxisKey.idValue;
+        const value = valueMap.get(mapKey);
+        if (value) {
+            cell.classes = this.CLASS_CELL;
+            cell.cellValue = "" + value.values.length;
+        } else {
+            cell.classes = this.CLASS_CELL_EMPTY;
+            cell.cellValue = "&nbsp;";
+        }
+
+        return cell;
     }
 
     private createAxisArray(sortAttr: XSortAttrEnum, axisSortType: AxisSortType, axisMap: AxisMap): AxisKeyData[] {
@@ -328,7 +427,7 @@ export default class Data {
         this._modelData.yAxisMap.clear();
     }
 
-    private logToConsole(message: string): void {
+    private logMessageToConsole(message: string): void {
         console.info(this._widgetName + new Date().toISOString() + " " + message);
     }
 }
