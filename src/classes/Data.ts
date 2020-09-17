@@ -327,10 +327,13 @@ export default class Data {
     private validateModelData(): boolean {
         let result = true;
 
-        const key = this._widgetProps.cellValueAction + "_" + this._valueDataType;
-        if (this._validActionAttrTypeCombinations.indexOf(key) < 0) {
-            this.addErrorToModel("Cell value action " + this._widgetProps.cellValueAction + " is not allowed for cell data type " + this._valueDataType);
-            result = false;
+        // Check cell value action against the cell data type. Count is always allowed.
+        if (this._widgetProps.cellValueAction !== "count") {
+            const key = this._widgetProps.cellValueAction + "_" + this._valueDataType;
+            if (this._validActionAttrTypeCombinations.indexOf(key) < 0) {
+                this.addErrorToModel("Cell value action " + this._widgetProps.cellValueAction + " is not allowed for cell data type " + this._valueDataType);
+                result = false;
+            }
         }
 
         return result;
