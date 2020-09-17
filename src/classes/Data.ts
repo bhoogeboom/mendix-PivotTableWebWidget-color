@@ -24,6 +24,7 @@ export default class Data {
             bodyRows: []
         }
     };
+    private _validActionAttrTypeCombinations = ["sum_number", "average_number", "min_date", "min_number", "max_date", "max_number", "display_string"];
 
     validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
         this._widgetProps = widgetProps;
@@ -307,12 +308,32 @@ export default class Data {
             this.logMessageToConsole("createTableData");
         }
 
+        if (!this.validateModelData()) {
+            return;
+        }
+
         // Create arrays from the axis maps in the requested order
         this.createAxisArrays();
 
+        // Create the header
         this.createHeaderRow();
 
+        // Create the body
         this.createBodyRows();
+
+        // TODO footer if requested
+    }
+
+    private validateModelData(): boolean {
+        let result = true;
+
+        const key = this._widgetProps.cellValueAction + "_" + this._valueDataType;
+        if (this._validActionAttrTypeCombinations.indexOf(key) < 0) {
+            this.addErrorToModel("Cell value action " + this._widgetProps.cellValueAction + " is not allowed for cell data type " + this._valueDataType);
+            result = false;
+        }
+
+        return result;
     }
 
     private createAxisArrays(): void {
@@ -440,20 +461,19 @@ export default class Data {
 
         switch (cellValueAction) {
             case "average":
-                return "" + this.getCellAverage(cellData);
+                return this.formatValue(this.getCellAverage(cellData));
 
             case "sum":
-                return "" + this.getCellSum(cellData);
+                return this.formatValue(this.getCellSum(cellData));
 
             case "min":
-                return "" + this.getCellMin(cellData);
+                return this.formatValue(this.getCellMin(cellData));
 
             case "max":
-                return "" + this.getCellMax(cellData);
+                return this.formatValue(this.getCellMax(cellData));
 
             case "display":
                 return "" + this.getCellDisplayValue(cellData);
-
             default:
                 return "" + cellData.values.length;
         }
@@ -472,7 +492,7 @@ export default class Data {
         return total;
     }
 
-    private getCellMin(cellData: ModelCellData): ModelCellValue {
+    private getCellMin(cellData: ModelCellData): number {
         let minValue = +Infinity;
         for (const value of cellData.values) {
             if (value) {
@@ -484,14 +504,10 @@ export default class Data {
                 }
             }
         }
-        if (this._valueDataType === "date") {
-            return this.formatDateFromNumber(minValue, this._widgetProps.cellValueDateformat);
-        } else {
-            return minValue;
-        }
+        return minValue;
     }
 
-    private getCellMax(cellData: ModelCellData): ModelCellValue {
+    private getCellMax(cellData: ModelCellData): number {
         let minValue = -Infinity;
         for (const value of cellData.values) {
             if (value) {
@@ -503,11 +519,7 @@ export default class Data {
                 }
             }
         }
-        if (this._valueDataType === "date") {
-            return this.formatDateFromNumber(minValue, this._widgetProps.cellValueDateformat);
-        } else {
-            return minValue;
-        }
+        return minValue;
     }
 
     private getCellAverage(cellData: ModelCellData): number {
@@ -518,8 +530,28 @@ export default class Data {
         return cellData.values.join();
     }
 
+    private formatValue(numValue: number): string {
+        switch (this._valueDataType) {
+            case "date":
+                return this.formatDateFromNumber(numValue, this._widgetProps.cellValueDateformat);
+
+            case "number":
+                return this.formatDecimal(numValue);
+
+            default:
+                return "" + numValue;
+        }
+    }
+
     private formatDateFromNumber(numValue: number, dateFormat: string): string {
         return mx.parser.formatValue(new Date(numValue), "datetime", { datePattern: dateFormat });
+    }
+
+    private formatDecimal(value: number, precision?: number): string {
+        if (precision === undefined) {
+            precision = this._widgetProps.precisionForDecimal;
+        }
+        return value.toFixed(precision);
     }
 
     get modelData(): ModelData {
@@ -534,5 +566,13 @@ export default class Data {
 
     private logMessageToConsole(message: string): void {
         console.info(this._widgetProps.name + new Date().toISOString() + " (Data) " + message);
+    }
+
+    private addErrorToModel(message: string): void {
+        if (!this._modelData.errorArray) {
+            this._modelData.errorArray = [message];
+        } else {
+            this._modelData.errorArray.push(message);
+        }
     }
 }

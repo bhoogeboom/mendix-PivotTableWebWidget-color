@@ -8,25 +8,25 @@ import "./ui/PivotTableWebWidget.css";
 import Data from "./classes/Data";
 
 export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
-    private CLASS_WIDGET = "pivotDataWidget";
+    private CLASS_WIDGET = "pivotTableWidget";
     private CLASS_CONFIG_ERRORS = "configurationErrors";
     private CLASS_NO_DATA = "noDataAvailable";
     private previousDataChangeDate?: Date = undefined;
     private tableData?: TableData = undefined;
-    private errorArray: ErrorArray;
+    private errorArray?: ErrorArray;
 
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
         this.errorArray = new Data().validateProps(props);
         this.state = {
-            lastServiceDataUpdate: undefined
+            lastStateUpdate: undefined
         };
     }
 
     render(): ReactNode {
         const { dataChangeDateAttr, dataSourceType, ds, serviceUrl } = this.props;
 
-        if (this.errorArray.length > 0) {
+        if (this.errorArray && this.errorArray.length > 0) {
             return this.renderErrors();
         }
 
@@ -75,14 +75,15 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             this.logMessageToConsole("renderErrors");
         }
 
-        const className = this.CLASS_WIDGET + " " + this.CLASS_CONFIG_ERRORS;
+        const className = this.CLASS_WIDGET + " " + this.CLASS_CONFIG_ERRORS + " " + this.props.class;
         return (
             <div className={className}>
                 <h3>Pivot table widget {this.props.name} has configuration errors</h3>
                 <ul>
-                    {this.errorArray.map((item: string, index) => {
-                        return <li key={index}>{item}</li>;
-                    })}
+                    {this.errorArray &&
+                        this.errorArray.map((item: string, index) => {
+                            return <li key={index}>{item}</li>;
+                        })}
                 </ul>
             </div>
         );
@@ -192,7 +193,20 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
 
         const data = new Data();
         data.getDataFromDatasource(this.props);
-        this.tableData = data.modelData.tableData;
+
+        const { modelData } = data;
+        if (modelData.errorArray && modelData.errorArray.length > 0) {
+            this.errorArray = modelData.errorArray;
+            this.tableData = undefined;
+            if (this.props.logToConsole) {
+                this.logMessageToConsole("getDataFromDatasource: Error(s) occurred while getting the data, change the state to force render.");
+            }
+            this.setState({
+                lastStateUpdate: new Date()
+            });
+        } else {
+            this.tableData = modelData.tableData;
+        }
     }
 
     getDataFromService(): void {
@@ -201,12 +215,18 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         }
         const data = new Data();
         data.getDataFromService(this.props).then(() => {
-            this.tableData = data.modelData.tableData;
+            const { modelData } = data;
+            if (modelData.errorArray && modelData.errorArray.length > 0) {
+                this.errorArray = modelData.errorArray;
+            } else {
+                this.tableData = undefined;
+                this.tableData = modelData.tableData;
+            }
             if (this.props.logToConsole) {
-                this.logMessageToConsole("getData: Received data from service, change the state to force render.");
+                this.logMessageToConsole("getDataFromService: Received data from service, change the state to force render.");
             }
             this.setState({
-                lastServiceDataUpdate: new Date()
+                lastStateUpdate: new Date()
             });
         });
     }

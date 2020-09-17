@@ -44,6 +44,7 @@ export interface ModelData {
     xAxisArray: AxisKeyData[];
     yAxisArray: AxisKeyData[];
     tableData: TableData;
+    errorArray?: ErrorArray;
 }
 
 export interface InputRow {

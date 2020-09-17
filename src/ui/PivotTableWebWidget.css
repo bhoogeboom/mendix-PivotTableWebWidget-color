@@ -1,33 +1,33 @@
 /*
 Place your custom CSS here
 */
-div.pivotDataWidget.configurationErrors {
+div.pivotTableWidget.configurationErrors {
     border: 1px solid red;
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
 }
 
-div.pivotDataWidget table,
-div.pivotDataWidget th,
-div.pivotDataWidget td {
+div.pivotTableWidget table,
+div.pivotTableWidget th,
+div.pivotTableWidget td {
 	border: 1px solid #D7D7D7;
     border-collapse: collapse;
 }
 
-div.pivotDataWidget th,
-div.pivotDataWidget td {
+div.pivotTableWidget th,
+div.pivotTableWidget td {
     padding: 5px;
 }
 
-div.pivotDataWidget td {
+div.pivotTableWidget td {
     text-align: center;
 }
 
-div.pivotDataWidget.cellLeft td {
+div.pivotTableWidget.cellLeft td {
     text-align: left;
 }
 
-div.pivotDataWidget.cellRight td {
+div.pivotTableWidget.cellRight td {
     text-align: right;
 }
