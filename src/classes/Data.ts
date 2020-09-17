@@ -1,4 +1,5 @@
-import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData } from "../types/CustomTypes";
+// eslint-disable-next-line prettier/prettier
+import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
@@ -8,10 +9,10 @@ export default class Data {
     private CLASS_HEADER_ROW = "pivotTableRowHeader";
     private CLASS_CELL = "pivotTableCell";
     private CLASS_CELL_EMPTY = "pivotTableCellEmpty";
-    private _widgetName: string;
-    private _logToConsole: boolean;
+    private _widgetProps!: PivotTableWebWidgetContainerProps; // The ! tells TypeScript not to complain about no initialization and possible undefined value.
     private _xAxisSortType: AxisSortType = undefined;
     private _yAxisSortType: AxisSortType = undefined;
+    private _valueDataType: ValueDataType = "string";
     private _modelData: ModelData = {
         valueMap: new Map<string, ModelCellData>(),
         xAxisArray: [],
@@ -24,25 +25,21 @@ export default class Data {
         }
     };
 
-    constructor(widgetName: string, logToConsole: boolean) {
-        this._widgetName = widgetName;
-        this._logToConsole = logToConsole;
-    }
-
     validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
-        const { dataSourceType } = widgetProps;
+        this._widgetProps = widgetProps;
+        const { dataSourceType } = this._widgetProps;
 
         switch (dataSourceType) {
             case "datasource":
-                return this.validateDatasourceProps(widgetProps);
+                return this.validateDatasourceProps();
 
             case "serviceCall":
-                return this.validateServiceProps(widgetProps);
+                return this.validateServiceProps();
         }
     }
 
-    private validateDatasourceProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
-        const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = widgetProps;
+    private validateDatasourceProps(): ErrorArray {
+        const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = this._widgetProps;
 
         const result: ErrorArray = [];
 
@@ -72,8 +69,8 @@ export default class Data {
         return result;
     }
 
-    private validateServiceProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
-        const { serviceUrl } = widgetProps;
+    private validateServiceProps(): ErrorArray {
+        const { serviceUrl } = this._widgetProps;
 
         const result: ErrorArray = [];
 
@@ -85,13 +82,14 @@ export default class Data {
     }
 
     getDataFromDatasource(widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (this._logToConsole) {
+        this._widgetProps = widgetProps;
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("getDataFromDatasource start");
         }
 
         this.clearData();
 
-        const { ds } = widgetProps;
+        const { ds } = this._widgetProps;
 
         // Extra check, we know ds.items will be filled at this point but the syntax checker only sees something that can be undefined.
         if (!ds?.items) {
@@ -99,19 +97,19 @@ export default class Data {
         }
 
         // Process the datasource items
-        ds.items.map(item => this.getDataItemFromDatasource(item, widgetProps));
+        ds.items.map(item => this.getDataItemFromDatasource(item));
 
         // Create table data
-        this.createTableData(widgetProps);
+        this.createTableData();
 
         // Done
-        if (this._logToConsole) {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("getDataFromDatasource end, _xAxisSortType: " + this._xAxisSortType + ", _yAxisSortType: " + this._yAxisSortType);
         }
     }
 
-    private getDataItemFromDatasource(item: ObjectItem, widgetProps: PivotTableWebWidgetContainerProps): void {
-        const { cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, yIdAttr, yLabelAttr } = widgetProps;
+    private getDataItemFromDatasource(item: ObjectItem): void {
+        const { cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, yIdAttr, yLabelAttr } = this._widgetProps;
         const { valueMap, xAxisMap, yAxisMap } = this.modelData;
 
         if (!xIdAttr || !yIdAttr) {
@@ -184,11 +182,13 @@ export default class Data {
 
         // Date
         if (value instanceof Date) {
+            this._valueDataType = "date";
             return value.getTime();
         }
 
         // Numeric
         if (value instanceof Big) {
+            this._valueDataType = "number";
             return Number(value);
         }
 
@@ -197,7 +197,8 @@ export default class Data {
     }
 
     getDataFromService(widgetProps: PivotTableWebWidgetContainerProps): Promise<void> {
-        const { serviceUrl, logToConsole, xIdDataType, yIdDataType } = widgetProps;
+        this._widgetProps = widgetProps;
+        const { serviceUrl, logToConsole, xIdDataType, yIdDataType, valueDataType } = this._widgetProps;
         return new Promise((resolve, reject) => {
             // Extra check, we know url will be filled at this point but the syntax checker only sees something that can be undefined.
             if (serviceUrl?.status !== ValueStatus.Available) {
@@ -214,6 +215,20 @@ export default class Data {
             this._xAxisSortType = xIdDataType === "integer" ? "number" : "string";
             this._yAxisSortType = yIdDataType === "integer" ? "number" : "string";
 
+            switch (valueDataType) {
+                case "date":
+                    this._valueDataType = "date";
+                    break;
+
+                case "decimal":
+                case "integer":
+                    this._valueDataType = "number";
+                    break;
+
+                default:
+                    this._valueDataType = "string";
+            }
+
             // Example taken from https://github.com/mendixlabs/charts
             // You need to include mendix client, see https://www.npmjs.com/package/mendix-client
             const token = mx.session.getConfig("csrftoken");
@@ -228,7 +243,7 @@ export default class Data {
                 .then(response => {
                     if (response.ok) {
                         response.json().then(data => {
-                            this.processDataFromService(data, widgetProps);
+                            this.processDataFromService(data);
                             return resolve();
                         });
                     } else {
@@ -238,12 +253,14 @@ export default class Data {
         });
     }
 
-    private processDataFromService(data: any, widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (this._logToConsole) {
+    private processDataFromService(data: any): void {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("processDataFromService");
-            console.dir(data);
+            if (this._widgetProps.dumpServiceResponseInConsole) {
+                console.dir(data);
+            }
         }
-        const { cellValueAction } = widgetProps;
+        const { cellValueAction } = this._widgetProps;
         const { valueMap, xAxisMap, yAxisMap } = this._modelData;
 
         if (data && data.length) {
@@ -266,7 +283,7 @@ export default class Data {
         }
 
         // Create table data
-        this.createTableData(widgetProps);
+        this.createTableData();
     }
 
     private addResponseValuesToAxisMap(axisMap: AxisMap, id: ModelCellValue, responseLabelValue: string): void {
@@ -285,27 +302,57 @@ export default class Data {
         }
     }
 
-    private createTableData(widgetProps: PivotTableWebWidgetContainerProps): void {
-        if (this._logToConsole) {
+    private createTableData(): void {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("createTableData");
         }
 
         // Create arrays from the axis maps in the requested order
-        this.createAxisArrays(widgetProps);
+        this.createAxisArrays();
 
         this.createHeaderRow();
 
         this.createBodyRows();
     }
 
-    private createAxisArrays(widgetProps: PivotTableWebWidgetContainerProps): void {
-        const { xSortAttr, ySortAttr } = widgetProps;
+    private createAxisArrays(): void {
+        const { xSortAttr, ySortAttr } = this._widgetProps;
         this.modelData.xAxisArray = this.createAxisArray(xSortAttr, this._xAxisSortType, this.modelData.xAxisMap);
         this.modelData.yAxisArray = this.createAxisArray(ySortAttr, this._yAxisSortType, this.modelData.yAxisMap);
     }
 
+    private createAxisArray(sortAttr: XSortAttrEnum, axisSortType: AxisSortType, axisMap: AxisMap): AxisKeyData[] {
+        const unsortedArray: AxisKeyData[] = Array.from(axisMap.values());
+
+        // When requested to sort on ID, decide whether to sort numerically or as text.
+        // When sorting as text, use lowercase value.
+        return unsortedArray.sort((a: AxisKeyData, b: AxisKeyData) => {
+            let keyA: ModelCellValue;
+            let keyB: ModelCellValue;
+            if (sortAttr === "id") {
+                if (axisSortType === "number") {
+                    keyA = Number(a.idValue);
+                    keyB = Number(b.idValue);
+                } else {
+                    keyA = ("" + a.idValue).toLowerCase();
+                    keyB = ("" + b.idValue).toLowerCase();
+                }
+            } else {
+                keyA = a.labelValue.toLowerCase();
+                keyB = b.labelValue.toLowerCase();
+            }
+            if (keyA < keyB) {
+                return -1;
+            }
+            if (keyA > keyB) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+
     private createHeaderRow(): void {
-        if (this._logToConsole) {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("createHeaderRow");
         }
 
@@ -328,7 +375,7 @@ export default class Data {
     }
 
     private createTopLeftCell(): TableCellData {
-        if (this._logToConsole) {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("createTopLeftCell");
         }
 
@@ -340,7 +387,7 @@ export default class Data {
     }
 
     private createBodyRows(): void {
-        if (this._logToConsole) {
+        if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("createBodyRows");
         }
 
@@ -378,43 +425,101 @@ export default class Data {
         const value = valueMap.get(mapKey);
         if (value) {
             cell.classes = this.CLASS_CELL;
-            cell.cellValue = "" + value.values.length;
+            cell.cellValue = this.getTableCellValue(value);
         } else {
             cell.classes = this.CLASS_CELL_EMPTY;
+            // A null or empty value would case the table cell to be skipped.
             cell.cellValue = "&nbsp;";
         }
 
         return cell;
     }
 
-    private createAxisArray(sortAttr: XSortAttrEnum, axisSortType: AxisSortType, axisMap: AxisMap): AxisKeyData[] {
-        const unsortedArray: AxisKeyData[] = Array.from(axisMap.values());
+    private getTableCellValue(cellData: ModelCellData): string {
+        const { cellValueAction } = this._widgetProps;
 
-        // When requested to sort on ID, decide whether to sort numerically or as text.
-        // When sorting as text, use lowercase value.
-        return unsortedArray.sort((a: AxisKeyData, b: AxisKeyData) => {
-            let keyA: ModelCellValue;
-            let keyB: ModelCellValue;
-            if (sortAttr === "id") {
-                if (axisSortType === "number") {
-                    keyA = Number(a.idValue);
-                    keyB = Number(b.idValue);
-                } else {
-                    keyA = ("" + a.idValue).toLowerCase();
-                    keyB = ("" + b.idValue).toLowerCase();
+        switch (cellValueAction) {
+            case "average":
+                return "" + this.getCellAverage(cellData);
+
+            case "sum":
+                return "" + this.getCellSum(cellData);
+
+            case "min":
+                return "" + this.getCellMin(cellData);
+
+            case "max":
+                return "" + this.getCellMax(cellData);
+
+            case "display":
+                return "" + this.getCellDisplayValue(cellData);
+
+            default:
+                return "" + cellData.values.length;
+        }
+    }
+
+    private getCellSum(cellData: ModelCellData): number {
+        let total = 0;
+        for (const value of cellData.values) {
+            if (value) {
+                const numValue = Number(value);
+                if (!isNaN(numValue)) {
+                    total += numValue;
                 }
-            } else {
-                keyA = a.labelValue.toLowerCase();
-                keyB = b.labelValue.toLowerCase();
             }
-            if (keyA < keyB) {
-                return -1;
+        }
+        return total;
+    }
+
+    private getCellMin(cellData: ModelCellData): ModelCellValue {
+        let minValue = +Infinity;
+        for (const value of cellData.values) {
+            if (value) {
+                const numValue = Number(value);
+                if (!isNaN(numValue)) {
+                    if (numValue < minValue) {
+                        minValue = numValue;
+                    }
+                }
             }
-            if (keyA > keyB) {
-                return 1;
+        }
+        if (this._valueDataType === "date") {
+            return this.formatDateFromNumber(minValue, this._widgetProps.cellValueDateformat);
+        } else {
+            return minValue;
+        }
+    }
+
+    private getCellMax(cellData: ModelCellData): ModelCellValue {
+        let minValue = -Infinity;
+        for (const value of cellData.values) {
+            if (value) {
+                const numValue = Number(value);
+                if (!isNaN(numValue)) {
+                    if (numValue > minValue) {
+                        minValue = numValue;
+                    }
+                }
             }
-            return 0;
-        });
+        }
+        if (this._valueDataType === "date") {
+            return this.formatDateFromNumber(minValue, this._widgetProps.cellValueDateformat);
+        } else {
+            return minValue;
+        }
+    }
+
+    private getCellAverage(cellData: ModelCellData): number {
+        return this.getCellSum(cellData) / cellData.values.length;
+    }
+
+    private getCellDisplayValue(cellData: ModelCellData): string {
+        return cellData.values.join();
+    }
+
+    private formatDateFromNumber(numValue: number, dateFormat: string): string {
+        return mx.parser.formatValue(new Date(numValue), "datetime", { datePattern: dateFormat });
     }
 
     get modelData(): ModelData {
@@ -428,6 +533,6 @@ export default class Data {
     }
 
     private logMessageToConsole(message: string): void {
-        console.info(this._widgetName + new Date().toISOString() + " " + message);
+        console.info(this._widgetProps.name + new Date().toISOString() + " (Data) " + message);
     }
 }

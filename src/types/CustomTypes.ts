@@ -2,6 +2,8 @@ export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" 
 
 export type AxisSortType = "string" | "number" | undefined;
 
+export type ValueDataType = "string" | "number" | "date";
+
 export type AxisMap = Map<ModelCellValue, AxisKeyData>;
 
 export interface TableCellData {

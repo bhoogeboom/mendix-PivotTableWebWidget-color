@@ -55,6 +55,7 @@ export interface PivotTableWebWidgetContainerProps {
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
     logToConsole: boolean;
+    dumpServiceResponseInConsole: boolean;
 }
 
 export interface PivotTableWebWidgetPreviewProps {
@@ -86,4 +87,5 @@ export interface PivotTableWebWidgetPreviewProps {
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
     logToConsole: boolean;
+    dumpServiceResponseInConsole: boolean;
 }

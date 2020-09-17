@@ -248,6 +248,10 @@
                 <caption>Console logging</caption>
                 <description>Log widget progress to the console. Useful to get timing on data retrieval etc.</description>
             </property>
+            <property key="dumpServiceResponseInConsole" type="boolean" defaultValue="false">
+                <caption>Dump service response</caption>
+                <description>Dump the response of the service call to the console</description>
+            </property>
         </propertyGroup>
 
     </properties>
