@@ -24,6 +24,10 @@ div.pivotTableWidget td {
     text-align: center;
 }
 
+div.pivotTableWidget td.clickable {
+    cursor: pointer;
+}
+
 div.pivotTableWidget.cellLeft td {
     text-align: left;
 }

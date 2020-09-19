@@ -40,7 +40,20 @@ export default class Data {
     }
 
     private validateDatasourceProps(): ErrorArray {
-        const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = this._widgetProps;
+        const {
+            ds,
+            cellValueAction,
+            cellValueAttr,
+            xIdAttr,
+            xLabelAttr,
+            xSortAttr,
+            yIdAttr,
+            yLabelAttr,
+            ySortAttr,
+            onClickAction,
+            onCellClickXIdAttr,
+            onCellClickYIdAttr
+        } = this._widgetProps;
 
         const result: ErrorArray = [];
 
@@ -64,6 +77,23 @@ export default class Data {
         if (ySortAttr === "label") {
             if (!yLabelAttr) {
                 result.push("Y-axis label not set and sort is by label. Sort by ID or set a label attribute");
+            }
+        }
+
+        if (onClickAction) {
+            if (onCellClickXIdAttr) {
+                if (onCellClickXIdAttr.readOnly) {
+                    result.push("On click X-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
+                }
+            } else {
+                result.push("On click X-axis ID attribute is required when On click action is configured");
+            }
+            if (onCellClickYIdAttr) {
+                if (onCellClickYIdAttr.readOnly) {
+                    result.push("On click Y-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
+                }
+            } else {
+                result.push("On click Y-axis ID attribute is required when On click action is configured");
             }
         }
 
@@ -438,6 +468,7 @@ export default class Data {
 
     private createTableCell(xAxisKey: AxisKeyData, yAxisKey: AxisKeyData): TableCellData {
         const { valueMap } = this._modelData;
+        const { cellValueAction, useDisplayValueForCss } = this._widgetProps;
 
         const cell: TableCellData = {
             cellType: "Value",
@@ -450,6 +481,10 @@ export default class Data {
         if (value) {
             cell.classes = this.CLASS_CELL;
             cell.cellValue = this.getTableCellValue(value);
+            // For display, when requested, add the cell value as class. Useful for custom styling enum values.
+            if (cellValueAction === "display" && useDisplayValueForCss) {
+                cell.classes += " display-" + cell.cellValue.replace(/[^A-Za-z0-9]/g, "_");
+            }
         } else {
             cell.classes = this.CLASS_CELL_EMPTY;
             // A null or empty value would case the table cell to be skipped.

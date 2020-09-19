@@ -4,7 +4,7 @@
  * @author Mendix UI Content Team
  */
 import { CSSProperties } from "react";
-import { DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
@@ -50,10 +50,14 @@ export interface PivotTableWebWidgetContainerProps {
     showTotalRow: boolean;
     totalRowLabel?: DynamicValue<string>;
     noDataText: DynamicValue<string>;
+    useDisplayValueForCss: boolean;
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
+    onClickAction?: ActionValue;
+    onCellClickXIdAttr?: EditableValue<BigJs.Big | string>;
+    onCellClickYIdAttr?: EditableValue<BigJs.Big | string>;
     logToConsole: boolean;
     dumpServiceResponseInConsole: boolean;
 }
@@ -82,10 +86,14 @@ export interface PivotTableWebWidgetPreviewProps {
     showTotalRow: boolean;
     totalRowLabel: string;
     noDataText: string;
+    useDisplayValueForCss: boolean;
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
+    onClickAction: {} | null;
+    onCellClickXIdAttr: string;
+    onCellClickYIdAttr: string;
     logToConsole: boolean;
     dumpServiceResponseInConsole: boolean;
 }

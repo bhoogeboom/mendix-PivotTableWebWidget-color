@@ -1,14 +1,14 @@
-import { Component, ReactNode, createElement } from "react";
+import { Component, ReactNode, createElement, SyntheticEvent } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 import { ValueStatus } from "mendix";
 import { ErrorArray, TableCellData, TableData, TableRowData } from "./types/CustomTypes";
-// import { TableData } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
 import Data from "./classes/Data";
 
 export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
     private CLASS_WIDGET = "pivotTableWidget";
+    private CLASS_CELL_CLICKABLE = "clickable";
     private CLASS_CONFIG_ERRORS = "configurationErrors";
     private CLASS_NO_DATA = "noDataAvailable";
     private previousDataChangeDate?: Date = undefined;
@@ -21,6 +21,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         this.state = {
             lastStateUpdate: undefined
         };
+        this.onClick = this.onClick.bind(this);
     }
 
     render(): ReactNode {
@@ -70,7 +71,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         return this.renderTable();
     }
 
-    renderErrors(): ReactNode {
+    private renderErrors(): ReactNode {
         if (this.props.logToConsole) {
             this.logMessageToConsole("renderErrors");
         }
@@ -89,7 +90,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         );
     }
 
-    renderTable(): ReactNode {
+    private renderTable(): ReactNode {
         if (this.props.logToConsole) {
             this.logMessageToConsole("renderTable");
         }
@@ -119,12 +120,12 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         }
     }
 
-    renderTableRow(rowData: TableRowData): ReactNode {
+    private renderTableRow(rowData: TableRowData): ReactNode {
         const rowKey = "tr_" + rowData.cells[0].idValueY;
         return <tr key={rowKey}>{rowData.cells.map(item => this.renderCell(item))}</tr>;
     }
 
-    renderCell(cell: TableCellData): ReactNode {
+    private renderCell(cell: TableCellData): ReactNode {
         switch (cell.cellType) {
             case "ColumnHeader":
                 const colKey = "x_" + cell.idValueX;
@@ -144,14 +145,45 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             default:
                 const cellKey = "c_" + cell.idValueY + cell.idValueX;
                 return (
-                    <td key={cellKey} className={cell.classes}>
+                    <td key={cellKey} className={this.getCellClasses(cell)} onClick={e => this.onClick(e, cell)}>
                         {cell.cellValue}
                     </td>
                 );
         }
     }
 
-    getData(): void {
+    onClick(e: SyntheticEvent, cell: TableCellData): void {
+        if (this.props.logToConsole) {
+            this.logMessageToConsole("onClick: Handle click on X: " + cell.idValueX + ", Y: " + cell.idValueY);
+        }
+
+        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr } = this.props;
+        e.preventDefault();
+
+        if (onClickAction && onClickAction.canExecute && !onClickAction.isExecuting) {
+            const idValueX = cell.idValueX ? cell.idValueX : "";
+            if (onCellClickXIdAttr) {
+                onCellClickXIdAttr.setTextValue(idValueX);
+            }
+            const idValueY = cell.idValueY ? cell.idValueY : "";
+            if (onCellClickYIdAttr) {
+                onCellClickYIdAttr.setTextValue(idValueY);
+            }
+            onClickAction.execute();
+        }
+    }
+
+    private getCellClasses(cell: TableCellData): string {
+        const classArray = [cell.classes];
+
+        if (this.props.onClickAction) {
+            classArray.push(this.CLASS_CELL_CLICKABLE);
+        }
+
+        return classArray.join(" ");
+    }
+
+    private getData(): void {
         const { dataChangeDateAttr, dataSourceType } = this.props;
         if (this.props.logToConsole) {
             this.logMessageToConsole("getData");
@@ -186,7 +218,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         }
     }
 
-    getDataFromDatasource(): void {
+    private getDataFromDatasource(): void {
         if (this.props.logToConsole) {
             this.logMessageToConsole("getDataFromDatasource");
         }
@@ -209,7 +241,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         }
     }
 
-    getDataFromService(): void {
+    private getDataFromService(): void {
         if (this.props.logToConsole) {
             this.logMessageToConsole("getDataFromService");
         }
@@ -231,11 +263,11 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         });
     }
 
-    logMessageToConsole(message: string): void {
+    private logMessageToConsole(message: string): void {
         console.info(this.props.name + new Date().toISOString() + " (widget) " + message);
     }
 
-    logErrorToConsole(message: string): void {
+    private logErrorToConsole(message: string): void {
         console.error(this.props.name + new Date().toISOString() + " (widget) " + message);
     }
 }

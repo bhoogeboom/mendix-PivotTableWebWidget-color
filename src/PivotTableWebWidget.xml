@@ -196,6 +196,10 @@
                     <translation lang="nl_NL">Geen gegevens beschikbaar</translation>
                 </translations>
             </property>
+            <property key="useDisplayValueForCss" type="boolean" defaultValue="false">
+                <caption>Use value as css class</caption>
+                <description>For action display, whether to use the display value as additional CSS class.</description>
+            </property>
         </propertyGroup>
     
         <propertyGroup caption="Axis configuration">
@@ -241,6 +245,37 @@
                     </enumerationValues>
                 </property>
             </propertyGroup>
+        </propertyGroup>
+
+        <!-- onClick properties -->
+
+        <propertyGroup caption="OnClick">
+            <property key="onClickAction" type="action" required="false">
+                <caption>On click action</caption>
+                <description>Configure the action to handle clicks on cells.</description>
+            </property>
+            <property key="onCellClickXIdAttr" type="attribute" required="false">
+                <caption>On click X-axis ID</caption>
+                <description>The attribute to contain the X-axis ID. Required when On click action is specified</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="onCellClickYIdAttr" type="attribute" required="false">
+                <caption>On click Y-axis ID</caption>
+                <description>The attribute to contain the Y-axis ID. Required when On click action is specified</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="Enum"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
         </propertyGroup>
 
         <propertyGroup caption="Advanced">
