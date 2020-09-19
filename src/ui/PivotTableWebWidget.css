@@ -15,6 +15,14 @@ div.pivotTableWidget td {
     border-collapse: collapse;
 }
 
+div.pivotTableWidget.pivotTableWidgetStriped table {
+    border: none;
+}
+
+div.pivotTableWidget.pivotTableWidgetStriped table tr:nth-child(even) {
+    background-color: #fbfbfb;
+}
+
 div.pivotTableWidget th,
 div.pivotTableWidget td {
     padding: 5px;

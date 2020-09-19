@@ -180,6 +180,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             classArray.push(this.CLASS_CELL_CLICKABLE);
         }
 
+        // The join function will skip null values, easier than dealing with that in the code.
         return classArray.join(" ");
     }
 
