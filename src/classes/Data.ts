@@ -40,20 +40,7 @@ export default class Data {
     }
 
     private validateDatasourceProps(): ErrorArray {
-        const {
-            ds,
-            cellValueAction,
-            cellValueAttr,
-            xIdAttr,
-            xLabelAttr,
-            xSortAttr,
-            yIdAttr,
-            yLabelAttr,
-            ySortAttr,
-            onClickAction,
-            onCellClickXIdAttr,
-            onCellClickYIdAttr
-        } = this._widgetProps;
+        const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = this._widgetProps;
 
         const result: ErrorArray = [];
 
@@ -77,23 +64,6 @@ export default class Data {
         if (ySortAttr === "label") {
             if (!yLabelAttr) {
                 result.push("Y-axis label not set and sort is by label. Sort by ID or set a label attribute");
-            }
-        }
-
-        if (onClickAction) {
-            if (onCellClickXIdAttr) {
-                if (onCellClickXIdAttr.readOnly) {
-                    result.push("On click X-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
-                }
-            } else {
-                result.push("On click X-axis ID attribute is required when On click action is configured");
-            }
-            if (onCellClickYIdAttr) {
-                if (onCellClickYIdAttr.readOnly) {
-                    result.push("On click Y-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
-                }
-            } else {
-                result.push("On click Y-axis ID attribute is required when On click action is configured");
             }
         }
 
@@ -357,11 +327,34 @@ export default class Data {
     private validateModelData(): boolean {
         let result = true;
 
+        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr } = this._widgetProps;
+
         // Check cell value action against the cell data type. Count is always allowed.
         if (this._widgetProps.cellValueAction !== "count") {
             const key = this._widgetProps.cellValueAction + "_" + this._valueDataType;
             if (this._validActionAttrTypeCombinations.indexOf(key) < 0) {
                 this.addErrorToModel("Cell value action " + this._widgetProps.cellValueAction + " is not allowed for cell data type " + this._valueDataType);
+                result = false;
+            }
+        }
+
+        if (onClickAction) {
+            if (onCellClickXIdAttr) {
+                if (onCellClickXIdAttr.status === ValueStatus.Available && onCellClickXIdAttr.readOnly) {
+                    this.addErrorToModel("On click X-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
+                    result = false;
+                }
+            } else {
+                this.addErrorToModel("On click X-axis ID attribute is required when On click action is configured");
+                result = false;
+            }
+            if (onCellClickYIdAttr) {
+                if (onCellClickYIdAttr.status === ValueStatus.Available && onCellClickYIdAttr.readOnly) {
+                    this.addErrorToModel("On click Y-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
+                    result = false;
+                }
+            } else {
+                this.addErrorToModel("On click Y-axis ID attribute is required when On click action is configured");
                 result = false;
             }
         }
