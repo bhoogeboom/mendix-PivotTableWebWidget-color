@@ -265,10 +265,10 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     }
 
     private logMessageToConsole(message: string): void {
-        console.info(this.props.name + new Date().toISOString() + " (widget) " + message);
+        console.info(this.props.name + " " + new Date().toISOString() + " (widget) " + message);
     }
 
     private logErrorToConsole(message: string): void {
-        console.error(this.props.name + new Date().toISOString() + " (widget) " + message);
+        console.error(this.props.name + " " + new Date().toISOString() + " (widget) " + message);
     }
 }

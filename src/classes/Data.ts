@@ -199,15 +199,25 @@ export default class Data {
 
     getDataFromService(widgetProps: PivotTableWebWidgetContainerProps): Promise<void> {
         this._widgetProps = widgetProps;
-        const { serviceUrl, logToConsole, xIdDataType, yIdDataType, valueDataType } = this._widgetProps;
+        const { serviceUrl, serviceParmAttr, logToConsole, xIdDataType, yIdDataType, valueDataType } = this._widgetProps;
         return new Promise((resolve, reject) => {
             // Extra check, we know url will be filled at this point but the syntax checker only sees something that can be undefined.
             if (serviceUrl?.status !== ValueStatus.Available) {
                 return reject(new Error("getDataFromService: URL not set"));
             }
 
+            let url = serviceUrl.value;
+            // If requested, add parameter value. As the URL may already contain parameters, check for presence of ? in the URL
+            if (serviceParmAttr && serviceParmAttr.status === ValueStatus.Available) {
+                if (url.indexOf("?") > 0) {
+                    url += "&context=" + serviceParmAttr.value;
+                } else {
+                    url += "?context=" + serviceParmAttr.value;
+                }
+            }
+
             if (logToConsole) {
-                this.logMessageToConsole("getDataFromService: " + serviceUrl.value);
+                this.logMessageToConsole("getDataFromService: " + url);
             }
 
             this.clearData();
@@ -234,7 +244,7 @@ export default class Data {
             // You need to include mendix client, see https://www.npmjs.com/package/mendix-client
             const token = mx.session.getConfig("csrftoken");
             window
-                .fetch(serviceUrl.value, {
+                .fetch(url, {
                     credentials: "include",
                     headers: {
                         "X-Csrf-Token": token,
@@ -596,7 +606,7 @@ export default class Data {
     }
 
     private logMessageToConsole(message: string): void {
-        console.info(this._widgetProps.name + new Date().toISOString() + " (Data) " + message);
+        console.info(this._widgetProps.name + " " + new Date().toISOString() + " (Data) " + message);
     }
 
     private addErrorToModel(message: string): void {

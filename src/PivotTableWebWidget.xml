@@ -141,6 +141,16 @@
                 <description>Only calls to the app backend are supported. So it must be in the format /rest/*yourServiceName*</description>
                 <returnType type="String" />
             </property>
+            <property key="serviceParmAttr" type="attribute" required="false">
+                <caption>Service parm value</caption>
+                <description>If set, will be passed as the value for query parameter context in the URL</description>
+                <attributeTypes>
+                    <attributeType name="AutoNumber"/>
+                    <attributeType name="Integer"/>
+                    <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
 
         </propertyGroup>
     

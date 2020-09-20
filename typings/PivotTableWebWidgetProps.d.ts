@@ -41,6 +41,7 @@ export interface PivotTableWebWidgetContainerProps {
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
     serviceUrl?: DynamicValue<string>;
+    serviceParmAttr?: EditableValue<BigJs.Big | string>;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForDecimal: number;
@@ -77,6 +78,7 @@ export interface PivotTableWebWidgetPreviewProps {
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
     serviceUrl: string;
+    serviceParmAttr: string;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
     precisionForDecimal: number | null;
