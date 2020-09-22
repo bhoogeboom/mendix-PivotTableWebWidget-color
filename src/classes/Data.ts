@@ -490,8 +490,8 @@ export default class Data {
             }
         } else {
             cell.classes = this.CLASS_CELL_EMPTY;
-            // A null or empty value would case the table cell to be skipped.
-            cell.cellValue = "&nbsp;";
+            // A null value would cause the table cell to be skipped.
+            cell.cellValue = "";
         }
 
         return cell;
