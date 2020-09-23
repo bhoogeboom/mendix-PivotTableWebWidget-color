@@ -105,6 +105,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                                 <tr>{this.tableData.headerRow.cells.map(cell => this.renderCell(cell))}</tr>
                             </thead>
                             <tbody>{this.tableData.bodyRows.map(row => this.renderTableRow(row))}</tbody>
+                            {this.renderTableFooter()}
                         </table>
                     </div>
                 );
@@ -125,6 +126,18 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         return <tr key={rowKey}>{rowData.cells.map(item => this.renderCell(item))}</tr>;
     }
 
+    private renderTableFooter(): ReactNode {
+        if (!this.props.showTotalRow || !this.tableData?.footerRow) {
+            return null;
+        }
+        const { footerRow } = this.tableData;
+        return (
+            <tfoot>
+                <tr>{footerRow.cells.map(item => this.renderCell(item))}</tr>
+            </tfoot>
+        );
+    }
+
     private renderCell(cell: TableCellData): ReactNode {
         switch (cell.cellType) {
             case "ColumnHeader":
@@ -140,6 +153,36 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                     <th key={rowKey} className={cell.classes}>
                         {cell.cellValue}
                     </th>
+                );
+
+            case "EmptyTopLeft":
+                return (
+                    <th key="TL" className={cell.classes}>
+                        {cell.cellValue}
+                    </th>
+                );
+
+            case "ColumnTotal":
+                const colTotalKey = "ty_" + cell.idValueY;
+                return (
+                    <td key={colTotalKey} className={cell.classes}>
+                        {cell.cellValue}
+                    </td>
+                );
+
+            case "RowTotal":
+                const rowTotalKey = "tx_" + cell.idValueX;
+                return (
+                    <td key={rowTotalKey} className={cell.classes}>
+                        {cell.cellValue}
+                    </td>
+                );
+
+            case "RowColumnTotal":
+                return (
+                    <td key="txy" className={cell.classes}>
+                        {cell.cellValue}
+                    </td>
                 );
 
             default:

@@ -40,6 +40,7 @@ div.pivotTableWidget.cellLeft td {
     text-align: left;
 }
 
-div.pivotTableWidget.cellRight td {
+div.pivotTableWidget.cellRight td,
+div.pivotTableWidget.cellRight thead th {
     text-align: right;
 }

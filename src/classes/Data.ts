@@ -5,8 +5,10 @@ import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
 
 export default class Data {
-    private CLASS_HEADER_COL = "pivotTableColumnHeader";
-    private CLASS_HEADER_ROW = "pivotTableRowHeader";
+    private CLASS_COL_HEADER = "pivotTableColumnHeader";
+    private CLASS_ROW_HEADER = "pivotTableRowHeader";
+    private CLASS_COL_TOTAL = "pivotTableColumnTotal";
+    private CLASS_ROW_TOTAL = "pivotTableRowTotal";
     private CLASS_CELL = "pivotTableCell";
     private CLASS_CELL_EMPTY = "pivotTableCellEmpty";
     private _widgetProps!: PivotTableWebWidgetContainerProps; // The ! tells TypeScript not to complain about no initialization and possible undefined value.
@@ -30,6 +32,8 @@ export default class Data {
         this._widgetProps = widgetProps;
         const { dataSourceType } = this._widgetProps;
 
+        // Note that some checks need the data or fully available properties, so these are in method validateModelData
+
         switch (dataSourceType) {
             case "datasource":
                 return this.validateDatasourceProps();
@@ -39,10 +43,29 @@ export default class Data {
         }
     }
 
+    private validateCommonProps(): ErrorArray {
+        const { cellValueAction, showTotalColumn, showTotalRow } = this._widgetProps;
+
+        const result: ErrorArray = [];
+
+        // Check whether total row/column is allowed
+        if (cellValueAction !== "count" && cellValueAction !== "sum") {
+            // Total row/column only allowed for count and sum
+            if (showTotalColumn) {
+                result.push("Total column is only supported for count and sum");
+            }
+            if (showTotalRow) {
+                result.push("Total row is only supported for count and sum");
+            }
+        }
+
+        return result;
+    }
+
     private validateDatasourceProps(): ErrorArray {
         const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = this._widgetProps;
 
-        const result: ErrorArray = [];
+        const result: ErrorArray = this.validateCommonProps();
 
         if (!ds) {
             result.push("Datasource not configured");
@@ -73,7 +96,7 @@ export default class Data {
     private validateServiceProps(): ErrorArray {
         const { serviceUrl } = this._widgetProps;
 
-        const result: ErrorArray = [];
+        const result: ErrorArray = this.validateCommonProps();
 
         if (!serviceUrl) {
             result.push("Service URL not set");
@@ -151,7 +174,8 @@ export default class Data {
             valueMap.set(mapKey, {
                 idValueX: xId,
                 idValueY: yId,
-                values: [modelCellValue]
+                values: [modelCellValue],
+                aggregatedValue: 0
             });
         }
         this.addAttrValuesToAxisMap(item, xAxisMap, xId, xLabelAttr);
@@ -285,7 +309,8 @@ export default class Data {
                     valueMap.set(mapKey, {
                         idValueX: element.idValueX,
                         idValueY: element.idValueY,
-                        values: [modelCellValue]
+                        values: [modelCellValue],
+                        aggregatedValue: 0
                     });
                 }
                 this.addResponseValuesToAxisMap(xAxisMap, element.idValueX, element.labelValueX);
@@ -322,6 +347,9 @@ export default class Data {
             return;
         }
 
+        // Aggregate values
+        this.aggregateValues();
+
         // Create arrays from the axis maps in the requested order
         this.createAxisArrays();
 
@@ -330,6 +358,11 @@ export default class Data {
 
         // Create the body
         this.createBodyRows();
+
+        // Create the total row?
+        if (this._widgetProps.showTotalRow) {
+            this.createTotalRow();
+        }
 
         // TODO footer if requested
     }
@@ -408,6 +441,39 @@ export default class Data {
         });
     }
 
+    private aggregateValues(): void {
+        this._modelData.valueMap.forEach(cellData => this.aggregateCellValue(cellData));
+    }
+
+    private aggregateCellValue(cellData: ModelCellData): void {
+        const { cellValueAction } = this._widgetProps;
+
+        switch (cellValueAction) {
+            case "average":
+                cellData.aggregatedValue = this.getCellAverage(cellData);
+                break;
+
+            case "sum":
+                cellData.aggregatedValue = this.getCellSum(cellData);
+                break;
+
+            case "min":
+                cellData.aggregatedValue = this.getCellMin(cellData);
+                break;
+
+            case "max":
+                cellData.aggregatedValue = this.getCellMax(cellData);
+                break;
+
+            case "display":
+                break;
+
+            default:
+                // Count, catch all
+                cellData.aggregatedValue = cellData.values.length;
+        }
+    }
+
     private createHeaderRow(): void {
         if (this._widgetProps.logToConsole) {
             this.logMessageToConsole("createHeaderRow");
@@ -422,10 +488,17 @@ export default class Data {
                 cellType: "ColumnHeader",
                 cellValue: xAxisKey.labelValue,
                 idValueX: "" + xAxisKey.idValue,
-                classes: this.CLASS_HEADER_COL
+                classes: this.CLASS_COL_HEADER
             };
             return cell;
         });
+
+        if (this._widgetProps.showTotalColumn) {
+            headerRow.cells.push({
+                cellType: "ColumnHeader",
+                cellValue: this._widgetProps.totalColumnLabel?.value ? this._widgetProps.totalColumnLabel.value : ""
+            });
+        }
 
         // Place top left cell at first position, can contain export button
         headerRow.cells.unshift(this.createTopLeftCell());
@@ -436,7 +509,7 @@ export default class Data {
             this.logMessageToConsole("createTopLeftCell");
         }
 
-        const cell: TableCellData = { cellType: "Empty" };
+        const cell: TableCellData = { cellType: "EmptyTopLeft" };
 
         // When the export function is added, the cell will contain the export button.
 
@@ -453,20 +526,81 @@ export default class Data {
     }
 
     private createBodyRow(yAxisKey: AxisKeyData): TableRowData {
-        const { xAxisArray } = this._modelData;
+        const { xAxisArray, valueMap } = this._modelData;
 
-        // Create the header cell array from the X axis labels
+        // Create the cell array for the row
         const cells = xAxisArray.map(xAxisKey => this.createTableCell(xAxisKey, yAxisKey));
 
+        if (this._widgetProps.showTotalColumn) {
+            let rowTotal = 0;
+            for (const xAxisKey of xAxisArray) {
+                const mapKey: string = xAxisKey.idValue + "_" + yAxisKey.idValue;
+                const value = valueMap.get(mapKey);
+                if (value) {
+                    rowTotal += value.aggregatedValue;
+                }
+            }
+            cells.push({
+                cellType: "ColumnTotal",
+                cellValue: this.formatValue(rowTotal),
+                idValueY: "" + yAxisKey.idValue,
+                classes: this.CLASS_COL_TOTAL
+            });
+        }
+
+        // Add the row header before the cells.
         cells.unshift({
             cellType: "RowHeader",
             cellValue: yAxisKey.labelValue,
             idValueY: "" + yAxisKey.idValue,
-            classes: this.CLASS_HEADER_ROW
+            classes: this.CLASS_ROW_HEADER
         });
 
         const row: TableRowData = { cells };
         return row;
+    }
+
+    private createTotalRow(): void {
+        const { xAxisArray, yAxisArray, valueMap } = this._modelData;
+
+        // Create the footer cell array from the X axis labels
+        let rowTotal = 0;
+        const cells = xAxisArray.map(xAxisKey => {
+            let columnTotal = 0;
+            for (const yAxisKey of yAxisArray) {
+                const mapKey: string = xAxisKey.idValue + "_" + yAxisKey.idValue;
+                const value = valueMap.get(mapKey);
+                if (value) {
+                    columnTotal += value.aggregatedValue;
+                }
+            }
+            rowTotal += columnTotal;
+
+            const cell: TableCellData = {
+                cellType: "RowTotal",
+                cellValue: this.formatValue(columnTotal),
+                idValueX: "" + xAxisKey.idValue,
+                classes: this.CLASS_ROW_TOTAL
+            };
+            return cell;
+        });
+
+        // Total of all row values.
+        if (this._widgetProps.showTotalColumn) {
+            cells.push({
+                cellType: "RowColumnTotal",
+                cellValue: this.formatValue(rowTotal),
+                classes: this.CLASS_ROW_TOTAL
+            });
+        }
+
+        // Add the row header before the cells.
+        cells.unshift({
+            cellType: "RowHeader",
+            cellValue: this._widgetProps.totalRowLabel?.value ? this._widgetProps.totalRowLabel.value : ""
+        });
+
+        this._modelData.tableData.footerRow = { cells };
     }
 
     private createTableCell(xAxisKey: AxisKeyData, yAxisKey: AxisKeyData): TableCellData {
@@ -483,7 +617,11 @@ export default class Data {
         const value = valueMap.get(mapKey);
         if (value) {
             cell.classes = this.CLASS_CELL;
-            cell.cellValue = this.getTableCellValue(value);
+            if (cellValueAction === "display") {
+                cell.cellValue = this.getCellDisplayValue(value);
+            } else {
+                cell.cellValue = this.formatValue(value.aggregatedValue);
+            }
             // For display, when requested, add the cell value as class. Useful for custom styling enum values.
             if (cellValueAction === "display" && useDisplayValueForCss) {
                 cell.classes += " display-" + cell.cellValue.replace(/[^A-Za-z0-9]/g, "_");
@@ -495,29 +633,6 @@ export default class Data {
         }
 
         return cell;
-    }
-
-    private getTableCellValue(cellData: ModelCellData): string {
-        const { cellValueAction } = this._widgetProps;
-
-        switch (cellValueAction) {
-            case "average":
-                return this.formatValue(this.getCellAverage(cellData));
-
-            case "sum":
-                return this.formatValue(this.getCellSum(cellData));
-
-            case "min":
-                return this.formatValue(this.getCellMin(cellData));
-
-            case "max":
-                return this.formatValue(this.getCellMax(cellData));
-
-            case "display":
-                return "" + this.getCellDisplayValue(cellData);
-            default:
-                return "" + cellData.values.length;
-        }
     }
 
     private getCellSum(cellData: ModelCellData): number {

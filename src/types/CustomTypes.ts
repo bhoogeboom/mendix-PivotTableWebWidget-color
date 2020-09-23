@@ -1,4 +1,4 @@
-export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" | "ColumnTotal" | "ExportButton" | "Empty";
+export type TableCellType = "ColumnHeader" | "RowHeader" | "Value" | "RowTotal" | "ColumnTotal" | "RowColumnTotal" | "ExportButton" | "EmptyTopLeft" | "Empty";
 
 export type AxisSortType = "string" | "number" | undefined;
 
@@ -35,6 +35,7 @@ export interface ModelCellData {
     idValueX: ModelCellValue;
     idValueY: ModelCellValue;
     values: ModelCellValue[];
+    aggregatedValue: number;
 }
 
 export interface ModelData {
