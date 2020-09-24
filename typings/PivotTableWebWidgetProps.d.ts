@@ -12,7 +12,7 @@ export type XIdDataTypeEnum = "string" | "integer";
 
 export type YIdDataTypeEnum = "string" | "integer";
 
-export type ValueDataTypeEnum = "string" | "integer" | "decimal" | "date";
+export type ValueDataTypeEnum = "string" | "number" | "date";
 
 export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
 
@@ -44,7 +44,7 @@ export interface PivotTableWebWidgetContainerProps {
     serviceParmAttr?: EditableValue<BigJs.Big | string>;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
-    precisionForDecimal: number;
+    precisionForNumbers: number;
     cellValueDateformat: string;
     showTotalColumn: boolean;
     totalColumnLabel?: DynamicValue<string>;
@@ -81,7 +81,7 @@ export interface PivotTableWebWidgetPreviewProps {
     serviceParmAttr: string;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
-    precisionForDecimal: number | null;
+    precisionForNumbers: number | null;
     cellValueDateformat: string;
     showTotalColumn: boolean;
     totalColumnLabel: string;

@@ -255,8 +255,7 @@ export default class Data {
                     this._valueDataType = "date";
                     break;
 
-                case "decimal":
-                case "integer":
+                case "number":
                     this._valueDataType = "number";
                     break;
 
@@ -698,7 +697,7 @@ export default class Data {
                 return this.formatDateFromNumber(numValue, this._widgetProps.cellValueDateformat);
 
             case "number":
-                return this.formatDecimal(numValue);
+                return this.formatNumericValue(numValue);
 
             default:
                 return "" + numValue;
@@ -709,9 +708,9 @@ export default class Data {
         return mx.parser.formatValue(new Date(numValue), "datetime", { datePattern: dateFormat });
     }
 
-    private formatDecimal(value: number, precision?: number): string {
+    private formatNumericValue(value: number, precision?: number): string {
         if (precision === undefined) {
-            precision = this._widgetProps.precisionForDecimal;
+            precision = this._widgetProps.precisionForNumbers;
         }
         return value.toFixed(precision);
     }

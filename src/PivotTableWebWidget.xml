@@ -131,8 +131,7 @@
                 <description>For type date, the value is a string which will be parsed into a date: 2020-09-15T09:53:56.771Z</description>
                 <enumerationValues>
                     <enumerationValue key="string">String</enumerationValue>
-                    <enumerationValue key="integer">Integer</enumerationValue>
-                    <enumerationValue key="decimal">Decimal</enumerationValue>
+                    <enumerationValue key="number">Integer or decimal</enumerationValue>
                     <enumerationValue key="date">Date</enumerationValue>
                 </enumerationValues>
             </property>
@@ -170,12 +169,12 @@
                 </enumerationValues>
             </property>
             <property key="precisionForAverage" type="integer" defaultValue="0">
-                <caption>Decimal precision for average</caption>
-                <description>Decimal precision for average, applicable for integer and long values only</description>
+                <caption>Average precision</caption>
+                <description>Decimal precision for average</description>
             </property>
-            <property key="precisionForDecimal" type="integer" defaultValue="2">
-                <caption>Decimal precision for Decimal</caption>
-                <description>Decimal precision for Decimal, also for average</description>
+            <property key="precisionForNumbers" type="integer" defaultValue="2">
+                <caption>Numeric precision</caption>
+                <description>Decimal precision for numeric values</description>
             </property>
             <property key="cellValueDateformat" type="string" defaultValue="dd-MM-yyyy">
                 <caption>Cell value date format</caption>

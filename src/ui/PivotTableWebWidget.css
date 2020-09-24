@@ -15,6 +15,15 @@ div.pivotTableWidget td {
     border-collapse: collapse;
 }
 
+div.pivotTableWidget tfoot {
+	border-top: 2px solid #D7D7D7;
+}
+
+div.pivotTableWidget .pivotTableRowTotal,
+div.pivotTableWidget thead tr th:last-child {
+	border-left: 2px solid #D7D7D7;
+}
+
 div.pivotTableWidget.pivotTableWidgetStriped table {
     border: none;
 }
