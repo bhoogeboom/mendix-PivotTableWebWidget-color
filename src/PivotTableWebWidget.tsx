@@ -163,7 +163,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 );
 
             case "ColumnTotal":
-                const colTotalKey = "ty_" + cell.idValueY;
+                const colTotalKey = "tx_" + cell.idValueX;
                 return (
                     <td key={colTotalKey} className={cell.classes}>
                         {cell.cellValue}
@@ -171,7 +171,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 );
 
             case "RowTotal":
-                const rowTotalKey = "tx_" + cell.idValueX;
+                const rowTotalKey = "ty_" + cell.idValueY;
                 return (
                     <td key={rowTotalKey} className={cell.classes}>
                         {cell.cellValue}

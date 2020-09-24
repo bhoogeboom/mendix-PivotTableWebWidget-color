@@ -496,7 +496,8 @@ export default class Data {
         if (this._widgetProps.showTotalColumn) {
             headerRow.cells.push({
                 cellType: "ColumnHeader",
-                cellValue: this._widgetProps.totalColumnLabel?.value ? this._widgetProps.totalColumnLabel.value : ""
+                cellValue: this._widgetProps.totalColumnLabel?.value ? this._widgetProps.totalColumnLabel.value : "",
+                classes: this.CLASS_COL_HEADER
             });
         }
 
@@ -541,10 +542,10 @@ export default class Data {
                 }
             }
             cells.push({
-                cellType: "ColumnTotal",
+                cellType: "RowTotal",
                 cellValue: this.formatValue(rowTotal),
                 idValueY: "" + yAxisKey.idValue,
-                classes: this.CLASS_COL_TOTAL
+                classes: this.CLASS_ROW_TOTAL
             });
         }
 
@@ -561,6 +562,10 @@ export default class Data {
     }
 
     private createTotalRow(): void {
+        if (this._widgetProps.logToConsole) {
+            this.logMessageToConsole("createTotalRow");
+        }
+
         const { xAxisArray, yAxisArray, valueMap } = this._modelData;
 
         // Create the footer cell array from the X axis labels
@@ -577,10 +582,10 @@ export default class Data {
             rowTotal += columnTotal;
 
             const cell: TableCellData = {
-                cellType: "RowTotal",
+                cellType: "ColumnTotal",
                 cellValue: this.formatValue(columnTotal),
                 idValueX: "" + xAxisKey.idValue,
-                classes: this.CLASS_ROW_TOTAL
+                classes: this.CLASS_COL_TOTAL
             };
             return cell;
         });
@@ -597,7 +602,8 @@ export default class Data {
         // Add the row header before the cells.
         cells.unshift({
             cellType: "RowHeader",
-            cellValue: this._widgetProps.totalRowLabel?.value ? this._widgetProps.totalRowLabel.value : ""
+            cellValue: this._widgetProps.totalRowLabel?.value ? this._widgetProps.totalRowLabel.value : "",
+            classes: this.CLASS_ROW_HEADER
         });
 
         this._modelData.tableData.footerRow = { cells };
