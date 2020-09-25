@@ -112,7 +112,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             } else {
                 return (
                     <div className={className}>
-                        <span className={this.CLASS_NO_DATA}>{this.props.noDataText}</span>
+                        <span className={this.CLASS_NO_DATA}>{this.props.noDataText.value}</span>
                     </div>
                 );
             }
