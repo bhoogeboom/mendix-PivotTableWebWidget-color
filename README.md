@@ -21,7 +21,7 @@ Especially when using non-persistent entities it is best to use a web service ra
 [step by step instructions]
 
 ## Web service
-The widget can call webservices, which can improve performance, especially for larger datasets. As no Mendix objects are transferred, only JSON, the result will not impact the client state. Combining this with OQL to aggegate your data in the backend can be a great combination.
+The widget can call webservices, which can improve performance, especially for larger datasets. As no Mendix objects are transferred, only JSON, the result will not impact the client state. Combining this with OQL to aggegate your data in the backend can be a great combination. You can specify additional parameters to include on the service call.
 
 ### Only to the app backend
 The widget will only call services on the app backend. If you wish to use external data, make that service call in your app logic.

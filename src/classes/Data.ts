@@ -1,5 +1,5 @@
 // eslint-disable-next-line prettier/prettier
-import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType } from "../types/CustomTypes";
+import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
@@ -151,12 +151,12 @@ export default class Data {
                 break;
 
             default:
-                modelCellValue = this.getModelCellValue(item, cellValueAttr);
+                modelCellValue = this.getModelCellValueForDatasource(item, cellValueAttr);
                 break;
         }
 
-        const xId: ModelCellValue = this.getModelCellValue(item, xIdAttr);
-        const yId: ModelCellValue = this.getModelCellValue(item, yIdAttr);
+        const xId: ModelCellValue = this.getModelCellValueForDatasource(item, xIdAttr);
+        const yId: ModelCellValue = this.getModelCellValueForDatasource(item, yIdAttr);
 
         // Determine the sort key, from the first real value (not null)
         if (this._xAxisSortType === undefined && xId) {
@@ -198,7 +198,7 @@ export default class Data {
         }
     }
 
-    private getModelCellValue(item: ObjectItem, attr?: ListAttributeValue<Big | Date | string>): ModelCellValue {
+    private getModelCellValueForDatasource(item: ObjectItem, attr?: ListAttributeValue<Big | Date | string>): ModelCellValue {
         if (!attr) {
             return "*null*";
         }
@@ -308,14 +308,13 @@ export default class Data {
                 console.dir(data);
             }
         }
-        const { cellValueAction } = this._widgetProps;
         const { valueMap, xAxisMap, yAxisMap } = this._modelData;
 
         if (data && data.length) {
             for (const element of data) {
                 const mapKey: string = element.idValueX + "_" + element.idValueY;
                 const mapValue: ModelCellData | undefined = valueMap.get(mapKey);
-                const modelCellValue: ModelCellValue = cellValueAction === "count" ? "NA" : element.value;
+                const modelCellValue: ModelCellValue = this.getModelCellValueForServiceData(element);
                 if (mapValue) {
                     mapValue.values.push(modelCellValue);
                 } else {
@@ -333,6 +332,24 @@ export default class Data {
 
         // Create table data
         this.createTableData();
+    }
+
+    private getModelCellValueForServiceData(element: InputRow): ModelCellValue {
+        const { cellValueAction } = this._widgetProps;
+        if (cellValueAction === "count") {
+            return "NA";
+        }
+
+        switch (this._valueDataType) {
+            case "date":
+                return new Date(element.value).getTime();
+
+            case "number":
+                return Number(element.value);
+
+            default:
+                return "" + element.value;
+        }
     }
 
     private addResponseValuesToAxisMap(axisMap: AxisMap, id: ModelCellValue, responseLabelValue: string): void {
