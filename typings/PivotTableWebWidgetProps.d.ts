@@ -14,6 +14,11 @@ export type YIdDataTypeEnum = "string" | "integer";
 
 export type ValueDataTypeEnum = "string" | "number" | "date";
 
+export interface ServiceParmListType {
+    parameterName: DynamicValue<string>;
+    parameterValue: DynamicValue<string>;
+}
+
 export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
 
 export type XSortAttrEnum = "label" | "id";
@@ -23,6 +28,11 @@ export type XSortDirectionEnum = "asc" | "desc";
 export type YSortAttrEnum = "label" | "id";
 
 export type YSortDirectionEnum = "asc" | "desc";
+
+export interface ServiceParmListPreviewType {
+    parameterName: string;
+    parameterValue: string;
+}
 
 export interface PivotTableWebWidgetContainerProps {
     name: string;
@@ -42,6 +52,7 @@ export interface PivotTableWebWidgetContainerProps {
     valueDataType: ValueDataTypeEnum;
     serviceUrl?: DynamicValue<string>;
     serviceParmAttr?: EditableValue<BigJs.Big | string>;
+    serviceParmList: ServiceParmListType[];
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForNumbers: number;
@@ -79,6 +90,7 @@ export interface PivotTableWebWidgetPreviewProps {
     valueDataType: ValueDataTypeEnum;
     serviceUrl: string;
     serviceParmAttr: string;
+    serviceParmList: ServiceParmListPreviewType[];
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
     precisionForNumbers: number | null;

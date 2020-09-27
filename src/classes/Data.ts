@@ -223,7 +223,7 @@ export default class Data {
 
     getDataFromService(widgetProps: PivotTableWebWidgetContainerProps): Promise<void> {
         this._widgetProps = widgetProps;
-        const { serviceUrl, serviceParmAttr, logToConsole, xIdDataType, yIdDataType, valueDataType } = this._widgetProps;
+        const { serviceUrl, serviceParmAttr, serviceParmList, logToConsole, xIdDataType, yIdDataType, valueDataType } = this._widgetProps;
         return new Promise((resolve, reject) => {
             // Extra check, we know url will be filled at this point but the syntax checker only sees something that can be undefined.
             if (serviceUrl?.status !== ValueStatus.Available) {
@@ -231,12 +231,26 @@ export default class Data {
             }
 
             let url = serviceUrl.value;
+
+            // Service parameters?
+            const urlHasParms = url.indexOf("?") > 0;
+            // Included any parameters from the properties.
+            const urlParmArray: string[] = [];
+            if (serviceParmList) {
+                for (const parm of serviceParmList) {
+                    urlParmArray.push(parm.parameterName.value + "=" + parm.parameterValue.value);
+                }
+            }
             // If requested, add parameter value. As the URL may already contain parameters, check for presence of ? in the URL
             if (serviceParmAttr && serviceParmAttr.status === ValueStatus.Available) {
-                if (url.indexOf("?") > 0) {
-                    url += "&context=" + serviceParmAttr.value;
+                urlParmArray.push("context=" + serviceParmAttr.value);
+            }
+            if (urlParmArray.length > 0) {
+                const queryParms = urlParmArray.join("&");
+                if (urlHasParms) {
+                    url += "&" + queryParms;
                 } else {
-                    url += "?context=" + serviceParmAttr.value;
+                    url += "?" + queryParms;
                 }
             }
 

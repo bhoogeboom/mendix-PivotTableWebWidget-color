@@ -150,6 +150,24 @@
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
+            <property key="serviceParmList" type="object" isList="true" required="false">
+                <caption>Query parameters</caption>
+                <description>Additional query parameters to add to the service URL.</description>
+                <properties>
+                    <propertyGroup caption="Table">
+                        <property key="parameterName" type="expression">
+                            <caption>Name</caption>
+                            <description>Be sure the value does not contain spaces.</description>
+                            <returnType type="String" />
+                        </property>
+                        <property key="parameterValue" type="expression">
+                            <caption>Value</caption>
+                            <description>Be sure the value does not contain spaces.</description>
+                            <returnType type="String" />
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
 
         </propertyGroup>
     
