@@ -728,7 +728,7 @@ export default class Data {
             }
             // For display, when requested, add the cell value as class. Useful for custom styling enum values.
             if (cellValueAction === "display" && useDisplayValueForCss) {
-                cell.classes += " display-" + cell.cellValue.replace(/[^A-Za-z0-9]/g, "_");
+                cell.classes += " display-" + cell.cellValue.replace(/[^A-Za-z0-9]/g, "_").toLowerCase();
             }
             if (cellValueAction !== "display") {
                 const conditionalStylingClass = this.getConditionalStylingClass(value);
