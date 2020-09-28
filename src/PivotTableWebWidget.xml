@@ -154,7 +154,7 @@
                 <caption>Query parameters</caption>
                 <description>Additional query parameters to add to the service URL.</description>
                 <properties>
-                    <propertyGroup caption="Table">
+                    <propertyGroup caption="Query parameters">
                         <property key="parameterName" type="expression">
                             <caption>Name</caption>
                             <description>Be sure the value does not contain spaces.</description>
@@ -229,6 +229,35 @@
             </property>
         </propertyGroup>
     
+        <!-- Conditional styling -->
+
+        <propertyGroup caption="Conditional styling">
+            <property key="conditionalStylingList" type="object" isList="true" required="false">
+                <caption>Styling entries</caption>
+                <description>Styling entries based on value. The additional CSS class is used when the cell value is at least the specified value but no more than the next item, if any. The widget will sort the list on the value.</description>
+                <properties>
+                    <propertyGroup caption="Styling">
+                        <property key="className" type="expression" required="false">
+                            <caption>Class</caption>
+                            <description>Class(es) to put on the cell. Optional, you can leave some cells at default styling if you only want to indicate low and high values.</description>
+                            <returnType type="String" />
+                        </property>
+                        <property key="decimalThresholdValue" type="expression" required="false">
+                            <caption>Decimal</caption>
+                            <description>Decimal threshold value, for all numeric value types.</description>
+                            <returnType type="Decimal" />
+                        </property>
+                        <property key="dateThresholdValue" type="expression" required="false">
+                            <caption>Date</caption>
+                            <description>Date threshold value. for date values only.</description>
+                            <returnType type="DateTime" />
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+
+
         <propertyGroup caption="Axis configuration">
 
             <!-- X-axis properties -->

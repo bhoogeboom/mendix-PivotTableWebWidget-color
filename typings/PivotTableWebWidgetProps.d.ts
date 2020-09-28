@@ -21,6 +21,12 @@ export interface ServiceParmListType {
 
 export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
 
+export interface ConditionalStylingListType {
+    className?: DynamicValue<string>;
+    decimalThresholdValue?: DynamicValue<BigJs.Big>;
+    dateThresholdValue?: DynamicValue<Date>;
+}
+
 export type XSortAttrEnum = "label" | "id";
 
 export type XSortDirectionEnum = "asc" | "desc";
@@ -32,6 +38,12 @@ export type YSortDirectionEnum = "asc" | "desc";
 export interface ServiceParmListPreviewType {
     parameterName: string;
     parameterValue: string;
+}
+
+export interface ConditionalStylingListPreviewType {
+    className: string;
+    decimalThresholdValue: string;
+    dateThresholdValue: string;
 }
 
 export interface PivotTableWebWidgetContainerProps {
@@ -63,6 +75,7 @@ export interface PivotTableWebWidgetContainerProps {
     totalRowLabel?: DynamicValue<string>;
     noDataText: DynamicValue<string>;
     useDisplayValueForCss: boolean;
+    conditionalStylingList: ConditionalStylingListType[];
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
     ySortAttr: YSortAttrEnum;
@@ -101,6 +114,7 @@ export interface PivotTableWebWidgetPreviewProps {
     totalRowLabel: string;
     noDataText: string;
     useDisplayValueForCss: boolean;
+    conditionalStylingList: ConditionalStylingListPreviewType[];
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
     ySortAttr: YSortAttrEnum;

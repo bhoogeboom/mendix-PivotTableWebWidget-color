@@ -1,5 +1,5 @@
 // eslint-disable-next-line prettier/prettier
-import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow } from "../types/CustomTypes";
+import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow, ConditionalStylingArray } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
@@ -44,7 +44,7 @@ export default class Data {
     }
 
     private validateCommonProps(): ErrorArray {
-        const { cellValueAction, showTotalColumn, showTotalRow } = this._widgetProps;
+        const { cellValueAction, showTotalColumn, showTotalRow, conditionalStylingList } = this._widgetProps;
 
         const result: ErrorArray = [];
 
@@ -57,6 +57,10 @@ export default class Data {
             if (showTotalRow) {
                 result.push("Total row is only supported for count and sum");
             }
+        }
+
+        if (cellValueAction === "display" && conditionalStylingList.length > 0) {
+            result.push("Conditional styling is not allowed for action Display");
         }
 
         return result;
@@ -377,6 +381,9 @@ export default class Data {
             return;
         }
 
+        // Store conditional styling data in array, if any.
+        this.createConditionalStylingArray();
+
         // Aggregate values
         this.aggregateValues();
 
@@ -393,14 +400,12 @@ export default class Data {
         if (this._widgetProps.showTotalRow) {
             this.createTotalRow();
         }
-
-        // TODO footer if requested
     }
 
     private validateModelData(): boolean {
         let result = true;
 
-        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr } = this._widgetProps;
+        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr, conditionalStylingList } = this._widgetProps;
 
         // Check cell value action against the cell data type. Count is always allowed.
         if (this._widgetProps.cellValueAction !== "count") {
@@ -432,7 +437,70 @@ export default class Data {
             }
         }
 
+        if (conditionalStylingList.length > 0) {
+            for (const item of conditionalStylingList) {
+                switch (this._valueDataType) {
+                    case "date":
+                        if (!item.dateThresholdValue?.value) {
+                            this.addErrorToModel("Conditional styling must have date values for date cell values.");
+                        }
+                        break;
+
+                    case "number":
+                        if (!item.decimalThresholdValue?.value) {
+                            this.addErrorToModel("Conditional styling must have decimal values for numeric cell values.");
+                        }
+                        break;
+
+                    default:
+                        this.addErrorToModel("Conditional styling can only be used for dates and numeric values.");
+                        break;
+                }
+            }
+        }
+
         return result;
+    }
+
+    private createConditionalStylingArray(): void {
+        const { conditionalStylingList } = this._widgetProps;
+
+        if (conditionalStylingList.length > 0) {
+            // Create an array of numeric values and the classes to use
+            const conditionalStylingArray: ConditionalStylingArray = [];
+            for (const item of conditionalStylingList) {
+                let value = 0;
+                // Date is used as millis. Check whether we have a value before using it.
+                switch (this._valueDataType) {
+                    case "date":
+                        if (item.dateThresholdValue?.value) {
+                            value = item.dateThresholdValue.value.getTime();
+                        }
+                        break;
+
+                    case "number":
+                        if (item.decimalThresholdValue?.value) {
+                            value = Number(item.decimalThresholdValue.value);
+                        }
+                        break;
+                }
+                conditionalStylingArray.push({
+                    className: item.className?.value ? item.className.value : "",
+                    value
+                });
+            }
+
+            // Sort the array
+            this._modelData.conditionalStylingArray = conditionalStylingArray.sort((itemA, itemB) => {
+                if (itemA.value < itemB.value) {
+                    return -1;
+                }
+                if (itemB.value > itemA.value) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
     }
 
     private createAxisArrays(): void {
@@ -662,6 +730,12 @@ export default class Data {
             if (cellValueAction === "display" && useDisplayValueForCss) {
                 cell.classes += " display-" + cell.cellValue.replace(/[^A-Za-z0-9]/g, "_");
             }
+            if (cellValueAction !== "display") {
+                const conditionalStylingClass = this.getConditionalStylingClass(value);
+                if (conditionalStylingClass) {
+                    cell.classes += " " + conditionalStylingClass;
+                }
+            }
         } else {
             cell.classes = this.CLASS_CELL_EMPTY;
             // A null value would cause the table cell to be skipped.
@@ -669,6 +743,26 @@ export default class Data {
         }
 
         return cell;
+    }
+
+    private getConditionalStylingClass(value: ModelCellData): string | undefined {
+        const { conditionalStylingArray } = this._modelData;
+
+        if (!conditionalStylingArray) {
+            return undefined;
+        }
+
+        // Loop through the conditional styling array. Take the class name when aggregated value >= item value.
+        // If the aggregated value exceeds the value of multiple items, the result will be that the item with the highest matching value is used.
+        // (The array is sorted on value.)
+        let className: string | undefined;
+        for (const item of conditionalStylingArray) {
+            if (value.aggregatedValue >= item.value) {
+                className = item.className;
+            }
+        }
+
+        return className;
     }
 
     private getCellSum(cellData: ModelCellData): number {

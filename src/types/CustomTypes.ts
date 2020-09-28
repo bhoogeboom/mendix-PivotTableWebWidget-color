@@ -38,6 +38,15 @@ export interface ModelCellData {
     aggregatedValue: number;
 }
 
+export interface ConditionalStylingItem {
+    value: number;
+    className: string;
+}
+
+export type ConditionalStylingArray = ConditionalStylingItem[];
+
+export type ErrorArray = string[];
+
 export interface ModelData {
     valueMap: Map<string, ModelCellData>;
     xAxisMap: AxisMap;
@@ -45,6 +54,7 @@ export interface ModelData {
     xAxisArray: AxisKeyData[];
     yAxisArray: AxisKeyData[];
     tableData: TableData;
+    conditionalStylingArray?: ConditionalStylingArray;
     errorArray?: ErrorArray;
 }
 
@@ -55,5 +65,3 @@ export interface InputRow {
     labelValueY: string;
     value: string | number;
 }
-
-export type ErrorArray = string[];
