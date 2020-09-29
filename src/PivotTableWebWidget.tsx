@@ -146,14 +146,16 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 const colKey = "x_" + cell.idValueX;
                 return (
                     <th key={colKey} className={cell.classes}>
-                        {cell.cellValue}
+                        <div>
+                            <span>{cell.cellValue}</span>
+                        </div>
                     </th>
                 );
             case "RowHeader":
                 const rowKey = "y_" + cell.idValueY;
                 return (
                     <th key={rowKey} className={cell.classes}>
-                        {cell.cellValue}
+                        <span>{cell.cellValue}</span>
                     </th>
                 );
 
@@ -171,7 +173,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 const colTotalKey = "tx_" + cell.idValueX;
                 return (
                     <td key={colTotalKey} className={cell.classes}>
-                        {cell.cellValue}
+                        <span>{cell.cellValue}</span>
                     </td>
                 );
 
@@ -179,7 +181,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 const rowTotalKey = "ty_" + cell.idValueY;
                 return (
                     <td key={rowTotalKey} className={cell.classes}>
-                        {cell.cellValue}
+                        <span>{cell.cellValue}</span>
                     </td>
                 );
 
