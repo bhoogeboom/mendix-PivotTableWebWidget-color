@@ -243,30 +243,32 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             return;
         }
 
+        const { exportFilenamePrefix, exportFilenameDateformat, exportDataAttr, exportFilenameAttr, exportAction } = this.props;
         const { headerRow, bodyRows, footerRow } = this.tableData;
 
-        let exportData = "";
+        if (exportDataAttr && exportFilenameAttr && exportAction && exportAction.canExecute && !exportAction.isExecuting) {
+            let exportData = "";
 
-        // Header
-        exportData += this.exportRowValues(headerRow);
+            // Header
+            exportData += this.exportRowValues(headerRow);
 
-        // Body
-        for (const row of bodyRows) {
-            exportData += this.exportRowValues(row);
+            // Body
+            for (const row of bodyRows) {
+                exportData += this.exportRowValues(row);
+            }
+
+            // Footer
+            if (this.props.showTotalRow && footerRow) {
+                exportData += this.exportRowValues(footerRow);
+            }
+
+            const dateFormat = exportFilenameDateformat?.value ? exportFilenameDateformat.value : "dd-MM-yyyy HH:mm:ss";
+            const dateString = mx.parser.formatValue(new Date(), "datetime", { datePattern: dateFormat });
+            const fileName = exportFilenamePrefix + " " + dateString + ".csv";
+            exportDataAttr.setValue(exportData);
+            exportFilenameAttr.setValue(fileName);
+            exportAction.execute();
         }
-
-        // Footer
-        if (this.props.showTotalRow && footerRow) {
-            exportData += this.exportRowValues(footerRow);
-        }
-
-        const { exportFilenamePrefix, exportFilenameDateformat } = this.props;
-        const dateFormat = exportFilenameDateformat?.value ? exportFilenameDateformat.value : "dd-MM-yyyy HH:mm:ss";
-        const dateString = mx.parser.formatValue(new Date(), "datetime", { datePattern: dateFormat });
-        const fileName = exportFilenamePrefix + " " + dateString + ".csv";
-        console.info("*** Export start *** " + fileName);
-        console.info(exportData);
-        console.info("*** Export complete ***");
     }
 
     private exportRowValues(row: TableRowData): string {
@@ -277,7 +279,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 result = this.exportCellValue(cell);
                 firstCell = false;
             } else {
-                result += "," + this.exportCellValue(cell);
+                result += ";" + this.exportCellValue(cell);
             }
         }
         result += "\r\n";

@@ -68,6 +68,7 @@ export interface PivotTableWebWidgetContainerProps {
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForNumbers: number;
+    useThousandSeparators: boolean;
     cellValueDateformat: DynamicValue<string>;
     showTotalColumn: boolean;
     totalColumnLabel?: DynamicValue<string>;
@@ -88,6 +89,9 @@ export interface PivotTableWebWidgetContainerProps {
     exportButtonClass: string;
     exportFilenamePrefix: string;
     exportFilenameDateformat: DynamicValue<string>;
+    exportDataAttr?: EditableValue<string>;
+    exportFilenameAttr?: EditableValue<string>;
+    exportAction?: ActionValue;
     logToConsole: boolean;
     dumpServiceResponseInConsole: boolean;
 }
@@ -112,6 +116,7 @@ export interface PivotTableWebWidgetPreviewProps {
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
     precisionForNumbers: number | null;
+    useThousandSeparators: boolean;
     cellValueDateformat: string;
     showTotalColumn: boolean;
     totalColumnLabel: string;
@@ -132,6 +137,9 @@ export interface PivotTableWebWidgetPreviewProps {
     exportButtonClass: string;
     exportFilenamePrefix: string;
     exportFilenameDateformat: string;
+    exportDataAttr: string;
+    exportFilenameAttr: string;
+    exportAction: {} | null;
     logToConsole: boolean;
     dumpServiceResponseInConsole: boolean;
 }

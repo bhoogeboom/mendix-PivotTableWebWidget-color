@@ -194,6 +194,10 @@
                 <caption>Numeric precision</caption>
                 <description>Decimal precision for numeric values</description>
             </property>
+            <property key="useThousandSeparators" type="boolean" defaultValue="false">
+                <caption>Use thousand separators</caption>
+                <description>Use thousand separators, for numeric values only.</description>
+            </property>
             <property key="cellValueDateformat" type="textTemplate">
                 <caption>Cell value date format</caption>
                 <description>Cell value date format, applicable for date/time only</description>
@@ -371,6 +375,24 @@
                     <translation lang="en_GB">dd/MM/yyyy HH:mm:ss</translation>
                     <translation lang="nl_NL">dd-MM-yyyy HH:mm:ss</translation>
                 </translations>
+            </property>
+            <property key="exportDataAttr" type="attribute" required="false">
+                <caption>Export data attr</caption>
+                <description>The attribute that will receive the export data. Be sure to use an unlimited length string!</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="exportFilenameAttr" type="attribute" required="false">
+                <caption>Export file name attr</caption>
+                <description>The attribute that will receive the export file name.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="exportAction" type="action" required="false">
+                <caption>Export action</caption>
+                <description>Handle the export request in this action.</description>
             </property>
         </propertyGroup>
 

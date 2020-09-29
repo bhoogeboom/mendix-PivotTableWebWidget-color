@@ -405,7 +405,7 @@ export default class Data {
     private validateModelData(): boolean {
         let result = true;
 
-        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr, conditionalStylingList } = this._widgetProps;
+        const { onClickAction, onCellClickXIdAttr, onCellClickYIdAttr } = this._widgetProps;
 
         // Check cell value action against the cell data type. Count is always allowed.
         if (this._widgetProps.cellValueAction !== "count") {
@@ -437,6 +437,8 @@ export default class Data {
             }
         }
 
+        const { conditionalStylingList } = this._widgetProps;
+
         if (conditionalStylingList.length > 0) {
             for (const item of conditionalStylingList) {
                 switch (this._valueDataType) {
@@ -456,6 +458,33 @@ export default class Data {
                         this.addErrorToModel("Conditional styling can only be used for dates and numeric values.");
                         break;
                 }
+            }
+        }
+
+        const { allowExport, exportDataAttr, exportFilenameAttr, exportAction } = this._widgetProps;
+
+        if (allowExport) {
+            if (exportDataAttr) {
+                if (exportDataAttr.status === ValueStatus.Available && exportDataAttr.readOnly) {
+                    this.addErrorToModel("Export data attribute is readonly, be sure to set your dataview to editable and grant access");
+                    result = false;
+                }
+            } else {
+                this.addErrorToModel("Export data attribute is required when export is allowed");
+                result = false;
+            }
+            if (exportFilenameAttr) {
+                if (exportFilenameAttr.status === ValueStatus.Available && exportFilenameAttr.readOnly) {
+                    this.addErrorToModel("Export file name attribute is readonly, be sure to set your dataview to editable and grant access");
+                    result = false;
+                }
+            } else {
+                this.addErrorToModel("Export file name attribute is required when export is allowed");
+                result = false;
+            }
+            if (!exportAction) {
+                this.addErrorToModel("Export action is required when export is allowed");
+                result = false;
             }
         }
 
@@ -838,10 +867,11 @@ export default class Data {
     }
 
     private formatNumericValue(value: number, precision?: number): string {
+        const { precisionForNumbers, useThousandSeparators } = this._widgetProps;
         if (precision === undefined) {
-            precision = this._widgetProps.precisionForNumbers;
+            precision = precisionForNumbers;
         }
-        return value.toFixed(precision);
+        return mx.parser.formatValue(value, "decimal", { places: precision, groups: useThousandSeparators });
     }
 
     get modelData(): ModelData {

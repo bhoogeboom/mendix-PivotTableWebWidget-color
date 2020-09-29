@@ -46,6 +46,17 @@ For ID values, it is best to format the dates in the backend as aggregation usua
 
 The demo project has an example of the service and mappings.
 
+## Export
+
+The widget can export the table data as CSV. There are options to force a save file dialog directly from the browser. As some don't look very solid and others don't play well with React, this widget relies on the backend to handle the file creation. You will need to do the following:
+- Create an entity that inherits from FileDocument to create the CSV file.
+- Create a microflow that handles the export:
+    - Create an object of the entity that inherits from FileDocument. Unless the document needs to be kept, be sure to set DeleteAfterDownload to true.
+	- Use CommunityCommons.StringToFile to store the CSV data in the file document.
+    - Clear the export data on the context object to reduce its size.
+	- Use the Download File activity to actually download the file.
+
+The demo project has microflow ACT_ExportToCsv that performs these actions.
 
 ## Demo project
 https://testpivottablewebw-sandbox.mxapps.io/
