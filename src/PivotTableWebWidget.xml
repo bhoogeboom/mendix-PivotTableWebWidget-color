@@ -194,10 +194,16 @@
                 <caption>Numeric precision</caption>
                 <description>Decimal precision for numeric values</description>
             </property>
-            <property key="cellValueDateformat" type="string" defaultValue="dd-MM-yyyy">
+            <property key="cellValueDateformat" type="textTemplate">
                 <caption>Cell value date format</caption>
                 <description>Cell value date format, applicable for date/time only</description>
+                <translations>
+                    <translation lang="en_US">MM/dd/yyyy</translation>
+                    <translation lang="en_GB">dd/MM/yyyy</translation>
+                    <translation lang="nl_NL">dd-MM-yyyy</translation>
+                </translations>
             </property>
+
             <property key="showTotalColumn" type="boolean" defaultValue="false">
                 <caption>Show total column</caption>
                 <description>Show row total column as last column.</description>
@@ -333,6 +339,42 @@
                 </attributeTypes>
             </property>
         </propertyGroup>
+
+        <!-- Export properties -->
+
+        <propertyGroup caption="Export to CSV">
+            <property key="allowExport" type="boolean" defaultValue="false">
+                <caption>Allow export</caption>
+                <description>If allowed, the top left cell will contain the export button.</description>
+            </property>
+            <property key="exportButtonCaption" type="textTemplate">
+                <caption>Button caption</caption>
+                <description>Export button caption, translatable</description>
+                <translations>
+                    <translation lang="en_US">Export</translation>
+                    <translation lang="nl_NL">Exporteren</translation>
+                </translations>
+            </property>
+            <property key="exportButtonClass" type="string" defaultValue="btn-default">
+                <caption>Button class</caption>
+                <description>Export button class(es), separate multiple values with a space.</description>
+            </property>
+            <property key="exportFilenamePrefix" type="string" defaultValue="export">
+                <caption>File name prefix</caption>
+                <description>Export file name prefix. Widget will add the date and csv extension</description>
+            </property>
+            <property key="exportFilenameDateformat" type="textTemplate">
+                <caption>File name date format</caption>
+                <description>File name value date format</description>
+                <translations>
+                    <translation lang="en_US">MM/dd/yyyy hh:mm:ss a</translation>
+                    <translation lang="en_GB">dd/MM/yyyy HH:mm:ss</translation>
+                    <translation lang="nl_NL">dd-MM-yyyy HH:mm:ss</translation>
+                </translations>
+            </property>
+        </propertyGroup>
+
+        <!-- Advanced properties -->
 
         <propertyGroup caption="Advanced">
             <property key="logToConsole" type="boolean" defaultValue="false">

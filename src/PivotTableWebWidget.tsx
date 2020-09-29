@@ -1,7 +1,7 @@
 import { Component, ReactNode, createElement, SyntheticEvent } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
 import { ValueStatus } from "mendix";
-import { ErrorArray, TableCellData, TableData, TableRowData } from "./types/CustomTypes";
+import { ErrorArray, TableCellData, TableData, TableRowData, ValueDataType } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
 import Data from "./classes/Data";
@@ -13,6 +13,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     private CLASS_NO_DATA = "noDataAvailable";
     private previousDataChangeDate?: Date = undefined;
     private tableData?: TableData = undefined;
+    private valueDataType: ValueDataType = "number";
     private errorArray?: ErrorArray;
 
     constructor(props: PivotTableWebWidgetContainerProps) {
@@ -22,6 +23,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             lastStateUpdate: undefined
         };
         this.onClick = this.onClick.bind(this);
+        this.onClickExportButton = this.onClickExportButton.bind(this);
     }
 
     render(): ReactNode {
@@ -156,9 +158,12 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 );
 
             case "EmptyTopLeft":
+                return <th key="TL" className={cell.classes} />;
+
+            case "ExportButton":
                 return (
-                    <th key="TL" className={cell.classes}>
-                        {cell.cellValue}
+                    <th key="TL_Export" className={cell.classes}>
+                        {this.renderExportButton()}
                     </th>
                 );
 
@@ -213,6 +218,90 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
                 onCellClickYIdAttr.setTextValue(idValueY);
             }
             onClickAction.execute();
+        }
+    }
+
+    private renderExportButton(): ReactNode {
+        const { exportButtonCaption, exportButtonClass } = this.props;
+        const className = "btn mx-button " + exportButtonClass;
+        return (
+            <button className={className} onClick={this.onClickExportButton}>
+                {exportButtonCaption.value}
+            </button>
+        );
+    }
+
+    onClickExportButton(): void {
+        if (this.props.logToConsole) {
+            this.logMessageToConsole("onClickExportButton called");
+        }
+
+        if (!this.tableData) {
+            if (this.props.logToConsole) {
+                this.logMessageToConsole("onClickExportButton: No table data");
+            }
+            return;
+        }
+
+        const { headerRow, bodyRows, footerRow } = this.tableData;
+
+        let exportData = "";
+
+        // Header
+        exportData += this.exportRowValues(headerRow);
+
+        // Body
+        for (const row of bodyRows) {
+            exportData += this.exportRowValues(row);
+        }
+
+        // Footer
+        if (this.props.showTotalRow && footerRow) {
+            exportData += this.exportRowValues(footerRow);
+        }
+
+        const { exportFilenamePrefix, exportFilenameDateformat } = this.props;
+        const dateFormat = exportFilenameDateformat?.value ? exportFilenameDateformat.value : "dd-MM-yyyy HH:mm:ss";
+        const dateString = mx.parser.formatValue(new Date(), "datetime", { datePattern: dateFormat });
+        const fileName = exportFilenamePrefix + " " + dateString + ".csv";
+        console.info("*** Export start *** " + fileName);
+        console.info(exportData);
+        console.info("*** Export complete ***");
+    }
+
+    private exportRowValues(row: TableRowData): string {
+        let result = "";
+        let firstCell = true;
+        for (const cell of row.cells) {
+            if (firstCell) {
+                result = this.exportCellValue(cell);
+                firstCell = false;
+            } else {
+                result += "," + this.exportCellValue(cell);
+            }
+        }
+        result += "\r\n";
+        return result;
+    }
+
+    private exportCellValue(cell: TableCellData): string {
+        switch (cell.cellType) {
+            case "EmptyTopLeft":
+            case "ExportButton":
+                return "";
+
+            case "ColumnHeader":
+            case "RowHeader":
+                const labelValue = cell.cellValue ? cell.cellValue : "";
+                return '"' + labelValue + '"';
+
+            default:
+                const cellValue = cell.cellValue ? cell.cellValue : "";
+                if (this.valueDataType === "string") {
+                    return '"' + cellValue + '"';
+                } else {
+                    return cellValue;
+                }
         }
     }
 
@@ -282,6 +371,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             });
         } else {
             this.tableData = modelData.tableData;
+            this.valueDataType = data.valueDataType;
         }
     }
 
@@ -295,8 +385,8 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             if (modelData.errorArray && modelData.errorArray.length > 0) {
                 this.errorArray = modelData.errorArray;
             } else {
-                this.tableData = undefined;
                 this.tableData = modelData.tableData;
+                this.valueDataType = data.valueDataType;
             }
             if (this.props.logToConsole) {
                 this.logMessageToConsole("getDataFromService: Received data from service, change the state to force render.");

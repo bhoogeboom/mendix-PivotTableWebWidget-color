@@ -608,9 +608,11 @@ export default class Data {
             this.logMessageToConsole("createTopLeftCell");
         }
 
-        const cell: TableCellData = { cellType: "EmptyTopLeft" };
+        const { allowExport } = this._widgetProps;
 
-        // When the export function is added, the cell will contain the export button.
+        const cell: TableCellData = {
+            cellType: allowExport ? "ExportButton" : "EmptyTopLeft"
+        };
 
         return cell;
     }
@@ -819,7 +821,9 @@ export default class Data {
     private formatValue(numValue: number): string {
         switch (this._valueDataType) {
             case "date":
-                return this.formatDateFromNumber(numValue, this._widgetProps.cellValueDateformat);
+                const { cellValueDateformat } = this._widgetProps;
+                const dateFormat = cellValueDateformat?.value ? cellValueDateformat.value : "dd-MM-yyyy";
+                return this.formatDateFromNumber(numValue, dateFormat);
 
             case "number":
                 return this.formatNumericValue(numValue);
@@ -842,6 +846,10 @@ export default class Data {
 
     get modelData(): ModelData {
         return this._modelData;
+    }
+
+    get valueDataType(): ValueDataType {
+        return this._valueDataType;
     }
 
     private clearData(): void {
