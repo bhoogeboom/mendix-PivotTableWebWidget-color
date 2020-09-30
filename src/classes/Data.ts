@@ -300,7 +300,7 @@ export default class Data {
                             return resolve();
                         });
                     } else {
-                        return Promise.reject(new Error("Call to URL " + serviceUrl.value + "failed: " + response.statusText));
+                        return Promise.reject(new Error("Call to URL " + serviceUrl.value + " failed: " + response.statusText));
                     }
                 });
         });
