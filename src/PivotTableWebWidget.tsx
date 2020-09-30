@@ -165,7 +165,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
             case "ExportButton":
                 return (
                     <th key="TL_Export" className={cell.classes}>
-                        {this.renderExportButton()}
+                        <div>{this.renderExportButton()}</div>
                     </th>
                 );
 

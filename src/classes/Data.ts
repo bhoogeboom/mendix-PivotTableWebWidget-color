@@ -5,6 +5,7 @@ import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
 
 export default class Data {
+    private CLASS_Cell_TOP_LEFT = "pivotTableTopLeft";
     private CLASS_COL_HEADER = "pivotTableColumnHeader";
     private CLASS_ROW_HEADER = "pivotTableRowHeader";
     private CLASS_COL_TOTAL = "pivotTableColumnTotal";
@@ -640,7 +641,8 @@ export default class Data {
         const { allowExport } = this._widgetProps;
 
         const cell: TableCellData = {
-            cellType: allowExport ? "ExportButton" : "EmptyTopLeft"
+            cellType: allowExport ? "ExportButton" : "EmptyTopLeft",
+            classes: this.CLASS_Cell_TOP_LEFT
         };
 
         return cell;
