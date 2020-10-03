@@ -1,5 +1,6 @@
 # PivotTableWebWidget
-Pivot table widget
+Pivot table widget for web pages. This widget replaces the
+[Pivot table widget](https://appstore.home.mendix.com/link/app/34298/ITvisors/Pivot-Table-Widget), referenced in this documentation as the old widget.
 
 # Features
 - Use a datasource or a REST service call for the data.
@@ -12,14 +13,14 @@ Pivot table widget
 # Entity to use
 Because non persistent entities are kept in the client state, these are not the preferred way when using a datasource. It is best to use persistent entities and make sure the objects are committed.
 
-However, existing implementations of this widget probably use non-persistent entities because that was the preferred way for Mendix 4 thru 6.
+However, implementations using the old widget probably use non-persistent entities because that was the preferred way for Mendix before release 7.
 
 Especially when using non-persistent entities it is best to use a web service rather than a datasource because the web service does not return Mendix objects but only JSON data.
 
 # The Data changed date attribute
-Pluggable widgets are rendered **really** often due to the way React works. Clicking buttons, conditional visibility elsewhere on the page, changing the contect object or opening a popup are examples. 
+Pluggable widgets are rendered **really** often due to the way React works. Clicking buttons, conditional visibility elsewhere on the page, changing the context object or opening a popup are examples. 
 
-To prevent lots of unnecessary server roundtrips, the widget will only reload the data when the value of the data changed date attribute changes. So whenever you want the widget to refresh, set the attribute to current date/time in your microflow.
+To prevent lots of unnecessary server roundtrips, the widget will only reload the data when the value of the data changed date attribute changes. So whenever you want the widget to refresh, set the attribute to current date/time in your microflow. When the date did not change, the widget will just render the data loaded in a previous render.
 
 # Migrating from the old pivot table widget
 Migration depends on whether you currently use persistent data directly in the widget.
@@ -63,6 +64,8 @@ The service should return a list of data items in the following format:
 
 The values can either be strings or numbers, depending on the type of data returned. As JSON does not know about dates, a date is to be transmitted as UTC date string, format: 2020-09-15T09:53:56.771Z, the widget will process it as a date.
 
+Don't forget you can change the name of the response element in the message definition in Studio Pro using the external single item name.
+
 For ID values, it is best to format the dates in the backend as aggregation usually takes place on an entire month or year. The key is then yyyyMM or just yyyy.
 
 The demo project has an example of the service and mappings.
@@ -93,14 +96,15 @@ By default cell values are centered.
 
 
 ## Classes available for use
+Put the class on the widget in Mendix.
 | Class                      | Description |
 |----------------------------|-
-| pivotTableWidgetStriped    | Put this class on the widget to give the rows an alternating color.
-| cellLeft                   | Put this class on the widget to left align cell data
-| cellRight                  | Put this class on the widget to right align cell data and column headers
+| pivotTableWidgetStriped    | Alternating row colors.
+| cellLeft                   | Left align cell data
+| cellRight                  | Right align cell data and column headers
 
 ## Rotated column headers
-The demo project has a tool to generate CSS for rotated column headers
+Getting rotated column headers right is a little tricky because of the math involved. The demo project has a tool to generate CSS for rotated column headers.
 
 ## Conditional styling
 To apply styling to a cell based on its value, use the conditional styling properties. For example, give all low values a red color and the high values a green color, leaving the intermediate ones default. For each style, set a lower limit using a decimal or date value and, optionally, a class. The settings would be:
@@ -113,7 +117,7 @@ To apply styling to a cell based on its value, use the conditional styling prope
 
 The effect is that any values lower than 100 will get class background-danger-light, no class is set for any values from 100 up to 500. Any values of 500 and over will get class background-success-light.
 
-These classes are supplied by Atlas UI Resource in the theme folder.
+These classes are supplied by Atlas UI Resource in the theme folder. You can of course create your own classes and use these.
 
 Note that the widget will order the styling items on ascending value, but for readability it is probably best if you order them on value anyway.
 
