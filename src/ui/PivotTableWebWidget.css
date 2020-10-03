@@ -15,6 +15,11 @@ div.pivotTableWidget td {
     border-collapse: collapse;
 }
 
+div.pivotTableWidget th.pivotTableTopLeft {
+    vertical-align: bottom;
+    text-align: left;
+}
+
 div.pivotTableWidget tfoot {
 	border-top: 2px solid #D7D7D7;
 }
@@ -46,6 +51,6 @@ div.pivotTableWidget.cellLeft td {
 }
 
 div.pivotTableWidget.cellRight td,
-div.pivotTableWidget.cellRight thead th {
+div.pivotTableWidget.cellRight thead th.pivotTableColumnHeader {
     text-align: right;
 }
