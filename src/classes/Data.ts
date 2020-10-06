@@ -27,7 +27,16 @@ export default class Data {
             bodyRows: []
         }
     };
-    private _validActionAttrTypeCombinations = ["sum_number", "average_number", "min_date", "min_number", "max_date", "max_number", "display_string"];
+    private _validActionAttrTypeCombinations = [
+        "sum_number",
+        "average_number",
+        "min_date",
+        "min_number",
+        "max_date",
+        "max_number",
+        "display_number",
+        "display_string"
+    ];
 
     validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
         this._widgetProps = widgetProps;
