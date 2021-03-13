@@ -147,7 +147,7 @@ export default class Data {
     }
 
     private getDataItemFromDatasource(item: ObjectItem): void {
-        const { cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, yIdAttr, yLabelAttr } = this._widgetProps;
+        const { cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xClassAttr, yIdAttr, yLabelAttr, yClassAttr } = this._widgetProps;
         const { valueMap, xAxisMap, yAxisMap } = this.modelData;
 
         if (!xIdAttr || !yIdAttr) {
@@ -192,21 +192,26 @@ export default class Data {
                 aggregatedValue: 0
             });
         }
-        this.addAttrValuesToAxisMap(item, xAxisMap, xId, xLabelAttr);
-        this.addAttrValuesToAxisMap(item, yAxisMap, yId, yLabelAttr);
+        this.addAttrValuesToAxisMap(item, xAxisMap, xId, xLabelAttr, xClassAttr);
+        this.addAttrValuesToAxisMap(item, yAxisMap, yId, yLabelAttr, yClassAttr);
     }
 
-    private addAttrValuesToAxisMap(item: ObjectItem, axisMap: AxisMap, id: ModelCellValue, attr?: ListAttributeValue<Big | Date | string>): void {
+    private addAttrValuesToAxisMap(item: ObjectItem, axisMap: AxisMap, id: ModelCellValue, attr?: ListAttributeValue<Big | Date | string>, classAttr?: ListAttributeValue<string>): void {
         if (!axisMap.has(id)) {
             let labelValue: string;
+            let classValue: string = "";
             if (attr) {
                 labelValue = attr(item).displayValue;
             } else {
                 labelValue = "" + id;
             }
+            if (classAttr) {
+                classValue = " " + classAttr(item).displayValue;
+            }
             const xAxisKeyData: AxisKeyData = {
                 idValue: id,
-                labelValue
+                labelValue,
+                classValue
             };
             axisMap.set(id, xAxisKeyData);
         }
@@ -339,8 +344,8 @@ export default class Data {
                         aggregatedValue: 0
                     });
                 }
-                this.addResponseValuesToAxisMap(xAxisMap, element.idValueX, element.labelValueX);
-                this.addResponseValuesToAxisMap(yAxisMap, element.idValueY, element.labelValueY);
+                this.addResponseValuesToAxisMap(xAxisMap, element.idValueX, element.labelValueX, element.classValueX);
+                this.addResponseValuesToAxisMap(yAxisMap, element.idValueY, element.labelValueY, element.classValueY);
             }
         }
 
@@ -366,17 +371,22 @@ export default class Data {
         }
     }
 
-    private addResponseValuesToAxisMap(axisMap: AxisMap, id: ModelCellValue, responseLabelValue: string): void {
+    private addResponseValuesToAxisMap(axisMap: AxisMap, id: ModelCellValue, responseLabelValue: string, responseClassValue: string): void {
         if (!axisMap.has(id)) {
             let labelValue: string;
+            let classValue: string = "";
             if (responseLabelValue) {
                 labelValue = responseLabelValue;
             } else {
                 labelValue = "" + id;
             }
+            if (responseClassValue) {
+                classValue = " " + responseClassValue;
+            }
             const xAxisKeyData: AxisKeyData = {
                 idValue: id,
-                labelValue
+                labelValue,
+                classValue
             };
             axisMap.set(id, xAxisKeyData);
         }
@@ -625,7 +635,7 @@ export default class Data {
                 cellType: "ColumnHeader",
                 cellValue: xAxisKey.labelValue,
                 idValueX: "" + xAxisKey.idValue,
-                classes: this.CLASS_COL_HEADER
+                classes: this.CLASS_COL_HEADER + xAxisKey.classValue
             };
             return cell;
         });
@@ -694,7 +704,7 @@ export default class Data {
             cellType: "RowHeader",
             cellValue: yAxisKey.labelValue,
             idValueY: "" + yAxisKey.idValue,
-            classes: this.CLASS_ROW_HEADER
+            classes: this.CLASS_ROW_HEADER + yAxisKey.classValue
         });
 
         const row: TableRowData = { cells };

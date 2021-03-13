@@ -29,6 +29,7 @@ export type ModelCellValue = string | number;
 export interface AxisKeyData {
     idValue: ModelCellValue;
     labelValue: string;
+    classValue: string;
 }
 
 export interface ModelCellData {
@@ -61,7 +62,9 @@ export interface ModelData {
 export interface InputRow {
     idValueX: string;
     labelValueX: string;
+    classValueX: string;
     idValueY: string;
     labelValueY: string;
+    classValueY: string;
     value: string | number;
 }

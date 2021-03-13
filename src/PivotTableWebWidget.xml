@@ -81,6 +81,13 @@
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
+            <property key="xClassAttr" type="attribute" dataSource="ds" required="false">
+                <caption>X-axis CSS class</caption>
+                <description>The attribute for a custom CSS class that is added to the column heading.</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
             <property key="yIdAttr" type="attribute" dataSource="ds" required="false">
                 <caption>Y-axis ID</caption>
                 <description>The attribute used for grouping the data on the Y-axis.</description>
@@ -101,6 +108,13 @@
                     <attributeType name="Enum"/>
                     <attributeType name="Integer"/>
                     <attributeType name="Long"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            <property key="yClassAttr" type="attribute" dataSource="ds" required="false">
+                <caption>Y-axis CSS class</caption>
+                <description>The attribute for a custom CSS class that is added to the row label.</description>
+                <attributeTypes>
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>

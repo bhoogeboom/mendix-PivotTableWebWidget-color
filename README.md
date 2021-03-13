@@ -7,6 +7,7 @@ Pivot table widget for web pages. This widget replaces the
 - Perform actions on the data in each cell.
 - React to click events on the cells.
 - Apply styling thresholds to highlight certain values
+- Apply custom styling to the X and Y labels
 - Export the table data as CSV
 - When there is no data, no table will be rendered but a (configurable) text will be shown.
 
@@ -58,8 +59,10 @@ The service should return a list of data items in the following format:
 |-------------|:-:|--|
 | idValueX    | Y | ID value for the X axis |
 | labelValueX |   | Label value for the X axis, ID value will be used if empty |
+| classValueX |   | CSS class to use for the label for the X axis, ignored if empty |
 | idValueY    | Y | ID value for the Y axis |
 | labelValueY |   | Label value for the Y axis, ID value will be used if empty |
+| classValueY |   | CSS class to use for the label for the Y axis, ignored if empty |
 | value       | ? | Value, required when Cell value action is not Count |
 
 The values can either be strings or numbers, depending on the type of data returned. As JSON does not know about dates, a date is to be transmitted as UTC date string, format: 2020-09-15T09:53:56.771Z, the widget will process it as a date.
@@ -87,8 +90,8 @@ By default cell values are centered.
 | Class                      | Description |
 |----------------------------|-
 | pivotTableTopLeft          | Topleft cell
-| pivotTableColumnHeader     | th of column header
-| pivotTableRowHeader        | th of row header
+| pivotTableColumnHeader     | th of column header. If you set the value of classValueX in your data items or set the X-axis CSS class for the datasource the value is added to the classes on the th column headers. 
+| pivotTableRowHeader        | th of row header.  If you set the value of classValueY in your data items or set the Y-axis CSS class for the datasource the value is added to the classes on the th row headers.
 | pivotTableColumnTotal      | td of the column total
 | pivotTableRowTotal         | td of the row total
 | pivotTableCell             | the td of a cell with a value

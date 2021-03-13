@@ -57,8 +57,10 @@ export interface PivotTableWebWidgetContainerProps {
     cellValueAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     xIdAttr?: ListAttributeValue<BigJs.Big | string>;
     xLabelAttr?: ListAttributeValue<BigJs.Big | string>;
+    xClassAttr?: ListAttributeValue<string>;
     yIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
     yLabelAttr?: ListAttributeValue<BigJs.Big | string>;
+    yClassAttr?: ListAttributeValue<string>;
     xIdDataType: XIdDataTypeEnum;
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
@@ -105,8 +107,10 @@ export interface PivotTableWebWidgetPreviewProps {
     cellValueAttr: string;
     xIdAttr: string;
     xLabelAttr: string;
+    xClassAttr: string;
     yIdAttr: string;
     yLabelAttr: string;
+    yClassAttr: string;
     xIdDataType: XIdDataTypeEnum;
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
