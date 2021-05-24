@@ -161,7 +161,7 @@ export default class Data {
                 break;
 
             case "display":
-                modelCellValue = cellValueAttr ? cellValueAttr(item).displayValue : "*null*";
+                modelCellValue = cellValueAttr ? cellValueAttr.get(item).displayValue : "*null*";
                 break;
 
             default:
@@ -196,17 +196,23 @@ export default class Data {
         this.addAttrValuesToAxisMap(item, yAxisMap, yId, yLabelAttr, yClassAttr);
     }
 
-    private addAttrValuesToAxisMap(item: ObjectItem, axisMap: AxisMap, id: ModelCellValue, attr?: ListAttributeValue<Big | Date | string>, classAttr?: ListAttributeValue<string>): void {
+    private addAttrValuesToAxisMap(
+        item: ObjectItem,
+        axisMap: AxisMap,
+        id: ModelCellValue,
+        attr?: ListAttributeValue<Big | Date | string>,
+        classAttr?: ListAttributeValue<string>
+    ): void {
         if (!axisMap.has(id)) {
             let labelValue: string;
-            let classValue: string = "";
+            let classValue = "";
             if (attr) {
-                labelValue = attr(item).displayValue;
+                labelValue = attr.get(item).displayValue;
             } else {
                 labelValue = "" + id;
             }
             if (classAttr) {
-                classValue = " " + classAttr(item).displayValue;
+                classValue = " " + classAttr.get(item).displayValue;
             }
             const xAxisKeyData: AxisKeyData = {
                 idValue: id,
@@ -221,7 +227,7 @@ export default class Data {
         if (!attr) {
             return "*null*";
         }
-        const editableValue = attr(item);
+        const editableValue = attr.get(item);
         const value = editableValue.value;
 
         // Date
@@ -374,7 +380,7 @@ export default class Data {
     private addResponseValuesToAxisMap(axisMap: AxisMap, id: ModelCellValue, responseLabelValue: string, responseClassValue: string): void {
         if (!axisMap.has(id)) {
             let labelValue: string;
-            let classValue: string = "";
+            let classValue = "";
             if (responseLabelValue) {
                 labelValue = responseLabelValue;
             } else {

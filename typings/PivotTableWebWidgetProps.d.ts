@@ -5,6 +5,7 @@
  */
 import { CSSProperties } from "react";
 import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue } from "mendix";
+import { Big } from "big.js";
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
@@ -23,7 +24,7 @@ export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | 
 
 export interface ConditionalStylingListType {
     className?: DynamicValue<string>;
-    decimalThresholdValue?: DynamicValue<BigJs.Big>;
+    decimalThresholdValue?: DynamicValue<Big>;
     dateThresholdValue?: DynamicValue<Date>;
 }
 
@@ -50,22 +51,22 @@ export interface PivotTableWebWidgetContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
-    tabIndex: number;
+    tabIndex?: number;
     dataSourceType: DataSourceTypeEnum;
     dataChangeDateAttr: EditableValue<Date>;
     ds?: ListValue;
-    cellValueAttr?: ListAttributeValue<BigJs.Big | Date | string>;
-    xIdAttr?: ListAttributeValue<BigJs.Big | string>;
-    xLabelAttr?: ListAttributeValue<BigJs.Big | string>;
+    cellValueAttr?: ListAttributeValue<Big | Date | string>;
+    xIdAttr?: ListAttributeValue<Big | string>;
+    xLabelAttr?: ListAttributeValue<Big | string>;
     xClassAttr?: ListAttributeValue<string>;
-    yIdAttr?: ListAttributeValue<BigJs.Big | Date | string>;
-    yLabelAttr?: ListAttributeValue<BigJs.Big | string>;
+    yIdAttr?: ListAttributeValue<Big | Date | string>;
+    yLabelAttr?: ListAttributeValue<Big | string>;
     yClassAttr?: ListAttributeValue<string>;
     xIdDataType: XIdDataTypeEnum;
     yIdDataType: YIdDataTypeEnum;
     valueDataType: ValueDataTypeEnum;
     serviceUrl?: DynamicValue<string>;
-    serviceParmAttr?: EditableValue<BigJs.Big | string>;
+    serviceParmAttr?: EditableValue<Big | string>;
     serviceParmList: ServiceParmListType[];
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
@@ -84,8 +85,8 @@ export interface PivotTableWebWidgetContainerProps {
     ySortAttr: YSortAttrEnum;
     ySortDirection: YSortDirectionEnum;
     onClickAction?: ActionValue;
-    onCellClickXIdAttr?: EditableValue<BigJs.Big | string>;
-    onCellClickYIdAttr?: EditableValue<BigJs.Big | string>;
+    onCellClickXIdAttr?: EditableValue<Big | string>;
+    onCellClickYIdAttr?: EditableValue<Big | string>;
     allowExport: boolean;
     exportButtonCaption: DynamicValue<string>;
     exportButtonClass: string;
