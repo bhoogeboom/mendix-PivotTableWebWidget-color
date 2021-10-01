@@ -1,6 +1,6 @@
 import { Component, ReactNode, createElement, SyntheticEvent } from "react";
 import { PivotTableWebWidgetContainerProps } from "../typings/PivotTableWebWidgetProps";
-import { ValueStatus } from "mendix";
+import { ObjectItem, ValueStatus } from "mendix";
 import { ErrorArray, TableCellData, TableData, TableRowData, ValueDataType } from "./types/CustomTypes";
 
 import "./ui/PivotTableWebWidget.css";
@@ -12,6 +12,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     private CLASS_CONFIG_ERRORS = "configurationErrors";
     private CLASS_NO_DATA = "noDataAvailable";
     private previousDataChangeDate?: Date = undefined;
+    private previousDataSourceItemArray?: ObjectItem[] = undefined;
     private tableData?: TableData = undefined;
     private valueDataType: ValueDataType = "number";
     private errorArray?: ErrorArray;
@@ -27,19 +28,13 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     }
 
     render(): ReactNode {
-        const { dataChangeDateAttr, dataSourceType, ds, serviceUrl } = this.props;
+        const { dataSourceType, ds, serviceUrl } = this.props;
 
         if (this.errorArray && this.errorArray.length > 0) {
             return this.renderErrors();
         }
 
         // If something is not (yet) available, render what we got from a previous render.
-        if (dataChangeDateAttr?.status !== ValueStatus.Available) {
-            if (this.props.logToConsole) {
-                this.logMessageToConsole("render: dataChangeDateAttr not yet available");
-            }
-            return this.renderTable();
-        }
         switch (dataSourceType) {
             case "datasource":
                 // Do not check for ds status here. If it is loading, we render current data, if any, this prevents flickering.
@@ -321,24 +316,10 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
     }
 
     private getData(): void {
-        const { dataChangeDateAttr, dataSourceType } = this.props;
+        const { dataSourceType } = this.props;
         if (this.props.logToConsole) {
             this.logMessageToConsole("getData");
         }
-
-        // We need a datachanged attribute value.
-        if (dataChangeDateAttr.value) {
-            // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
-            if (this.previousDataChangeDate && dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()) {
-                return;
-            }
-        } else {
-            this.logErrorToConsole("Data changed date is not set");
-            return;
-        }
-
-        // Store the date, also prevents multiple renders all triggering reload of the data.
-        this.previousDataChangeDate = dataChangeDateAttr.value;
 
         // Load the data
         switch (dataSourceType) {
@@ -359,6 +340,17 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         if (this.props.logToConsole) {
             this.logMessageToConsole("getDataFromDatasource");
         }
+
+        const { ds } = this.props;
+        if (this.previousDataSourceItemArray && ds?.items === this.previousDataSourceItemArray) {
+            if (this.props.logToConsole) {
+                this.logMessageToConsole("getDataFromDatasource: Datasource data still the same");
+            }
+            return;
+        }
+
+        this.logMessageToConsole("getDataFromDatasource: Datasource data changed");
+        this.previousDataSourceItemArray = ds?.items;
 
         const data = new Data();
         data.getDataFromDatasource(this.props);
@@ -383,6 +375,28 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
         if (this.props.logToConsole) {
             this.logMessageToConsole("getDataFromService");
         }
+        const { dataChangeDateAttr } = this.props;
+        // We need a datachanged attribute value.
+        if (dataChangeDateAttr?.value) {
+            // Only if the date is different to prevent getting the data (especially web service) when the render is only about resizing etc.
+            if (this.previousDataChangeDate && dataChangeDateAttr.value?.getTime() === this.previousDataChangeDate?.getTime()) {
+                if (this.props.logToConsole) {
+                    this.logMessageToConsole("getDataFromService: Date still the same.");
+                }
+                return;
+            }
+        } else {
+            if (this.props.logToConsole) {
+                this.logMessageToConsole("Data changed date is empty");
+            }
+            return;
+        }
+
+        this.logMessageToConsole("getDataFromService: Date changed.");
+
+        // Store the date, also prevents multiple renders all triggering reload of the data.
+        this.previousDataChangeDate = dataChangeDateAttr.value;
+
         const data = new Data();
         data.getDataFromService(this.props).then(() => {
             const { modelData } = data;
@@ -403,9 +417,5 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
 
     private logMessageToConsole(message: string): void {
         console.info(this.props.name + " " + new Date().toISOString() + " (widget) " + message);
-    }
-
-    private logErrorToConsole(message: string): void {
-        console.error(this.props.name + " " + new Date().toISOString() + " (widget) " + message);
     }
 }

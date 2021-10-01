@@ -9,6 +9,8 @@ import { Big } from "big.js";
 
 export type DataSourceTypeEnum = "datasource" | "serviceCall";
 
+export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
+
 export type XIdDataTypeEnum = "string" | "integer";
 
 export type YIdDataTypeEnum = "string" | "integer";
@@ -19,8 +21,6 @@ export interface ServiceParmListType {
     parameterName: DynamicValue<string>;
     parameterValue: DynamicValue<string>;
 }
-
-export type CellValueActionEnum = "count" | "sum" | "average" | "min" | "max" | "display";
 
 export interface ConditionalStylingListType {
     className?: DynamicValue<string>;
@@ -53,21 +53,6 @@ export interface PivotTableWebWidgetContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     dataSourceType: DataSourceTypeEnum;
-    dataChangeDateAttr: EditableValue<Date>;
-    ds?: ListValue;
-    cellValueAttr?: ListAttributeValue<Big | Date | string>;
-    xIdAttr?: ListAttributeValue<Big | string>;
-    xLabelAttr?: ListAttributeValue<Big | string>;
-    xClassAttr?: ListAttributeValue<string>;
-    yIdAttr?: ListAttributeValue<Big | Date | string>;
-    yLabelAttr?: ListAttributeValue<Big | string>;
-    yClassAttr?: ListAttributeValue<string>;
-    xIdDataType: XIdDataTypeEnum;
-    yIdDataType: YIdDataTypeEnum;
-    valueDataType: ValueDataTypeEnum;
-    serviceUrl?: DynamicValue<string>;
-    serviceParmAttr?: EditableValue<Big | string>;
-    serviceParmList: ServiceParmListType[];
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number;
     precisionForNumbers: number;
@@ -79,6 +64,21 @@ export interface PivotTableWebWidgetContainerProps {
     totalRowLabel?: DynamicValue<string>;
     noDataText: DynamicValue<string>;
     useDisplayValueForCss: boolean;
+    ds?: ListValue;
+    cellValueAttr?: ListAttributeValue<Big | Date | string>;
+    xIdAttr?: ListAttributeValue<Big | string>;
+    xLabelAttr?: ListAttributeValue<Big | string>;
+    xClassAttr?: ListAttributeValue<string>;
+    yIdAttr?: ListAttributeValue<Big | Date | string>;
+    yLabelAttr?: ListAttributeValue<Big | string>;
+    yClassAttr?: ListAttributeValue<string>;
+    dataChangeDateAttr?: EditableValue<Date>;
+    xIdDataType: XIdDataTypeEnum;
+    yIdDataType: YIdDataTypeEnum;
+    valueDataType: ValueDataTypeEnum;
+    serviceUrl?: DynamicValue<string>;
+    serviceParmAttr?: EditableValue<Big | string>;
+    serviceParmList: ServiceParmListType[];
     conditionalStylingList: ConditionalStylingListType[];
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;
@@ -103,21 +103,6 @@ export interface PivotTableWebWidgetPreviewProps {
     class: string;
     style: string;
     dataSourceType: DataSourceTypeEnum;
-    dataChangeDateAttr: string;
-    ds: {} | null;
-    cellValueAttr: string;
-    xIdAttr: string;
-    xLabelAttr: string;
-    xClassAttr: string;
-    yIdAttr: string;
-    yLabelAttr: string;
-    yClassAttr: string;
-    xIdDataType: XIdDataTypeEnum;
-    yIdDataType: YIdDataTypeEnum;
-    valueDataType: ValueDataTypeEnum;
-    serviceUrl: string;
-    serviceParmAttr: string;
-    serviceParmList: ServiceParmListPreviewType[];
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;
     precisionForNumbers: number | null;
@@ -129,6 +114,21 @@ export interface PivotTableWebWidgetPreviewProps {
     totalRowLabel: string;
     noDataText: string;
     useDisplayValueForCss: boolean;
+    ds: {} | { type: string } | null;
+    cellValueAttr: string;
+    xIdAttr: string;
+    xLabelAttr: string;
+    xClassAttr: string;
+    yIdAttr: string;
+    yLabelAttr: string;
+    yClassAttr: string;
+    dataChangeDateAttr: string;
+    xIdDataType: XIdDataTypeEnum;
+    yIdDataType: YIdDataTypeEnum;
+    valueDataType: ValueDataTypeEnum;
+    serviceUrl: string;
+    serviceParmAttr: string;
+    serviceParmList: ServiceParmListPreviewType[];
     conditionalStylingList: ConditionalStylingListPreviewType[];
     xSortAttr: XSortAttrEnum;
     xSortDirection: XSortDirectionEnum;

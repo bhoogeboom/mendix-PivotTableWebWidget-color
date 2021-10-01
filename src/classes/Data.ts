@@ -108,12 +108,16 @@ export default class Data {
     }
 
     private validateServiceProps(): ErrorArray {
-        const { serviceUrl } = this._widgetProps;
+        const { dataChangeDateAttr, serviceUrl } = this._widgetProps;
 
         const result: ErrorArray = this.validateCommonProps();
 
         if (!serviceUrl) {
             result.push("Service URL not set");
+        }
+
+        if (!dataChangeDateAttr) {
+            result.push("Data changed date attribute not set");
         }
 
         return result;

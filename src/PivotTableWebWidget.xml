@@ -5,23 +5,12 @@
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Pivot Table Web Widget</name>
     <description>Pivot table web widget</description>
-    <icon>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9i
-        ZSBJbWFnZVJlYWR5ccllPAAAAb1JREFUeNqck8tKw1AQhv/E1LTe0KWISlNqS1vFCyK4bXXn
-        SnwE8QXcFt/EF3Enoqh47YViaUVUXBU3oq3NSZyZNullJR045D8n55/55iRH2zs62gEwjcHi
-        A7vZ7IE7YLDXcJTSXEq1fQPQmj8cx5Hh8rN73n5/lZ4Ee3WllM4bOLYimjwzVkenSafDrr/u
-        afaw11C2rSlJoOGk4sIy6tTZt1TOhKjihwON3rN2fE1mdwLsNWzb7iFw3n5wmJiS+fXTE9YX
-        FkSfFwrYTCZFnz48EMEc2NtFACFIm8BdtSr9jgaDuCyVpOexUAhnuZxoDvb4BIo2dwiA1Py8
-        zO8rFaxGoy0aSrSRSIi+yOfBHiGQBH0E+ZcXIQiZJm7LZak6wjTFYg9BK0Gz6bfgEcRnZ2We
-        f37GUiQi+o7OYy0eb9FQIklA3p5D9AhKr69CYA4P45Ha4KpBorlpn4f3GdmrUxZd9f0H0ZkZ
-        xIii8fuLZDiMlGWh3mhgmb7ISizWaYG8RqNeH+onKL+/CwFHgdrwqt5TG90E7DU+azUzEAjg
-        OPbVvh/mv+4We9irjS8u7lM1a5CrqOt6VfOQBo0/AQYADu2BHPVXcUgAAAAASUVORK5CYII=
-    </icon>
+    <studioProCategory>Display</studioProCategory>
     <properties>
     
-        <!-- Datasource properties -->
+        <!-- Table properties -->
 
-        <propertyGroup caption="Datasource">
+        <propertyGroup caption="Table">
             <property key="dataSourceType" type="enumeration" defaultValue="datasource">
                 <caption>Data source type</caption>
                 <description></description>
@@ -30,17 +19,72 @@
                     <enumerationValue key="serviceCall">Service call</enumerationValue>
                 </enumerationValues>
             </property>
-            <property key="dataChangeDateAttr" type="attribute">
-                <caption>Data change date</caption>
-                <description>Update the date in your logic to make the widget update the table. (Pluggable widgets are rendered VERY often!)</description>
-                <attributeTypes>
-                    <attributeType name="DateTime"/>
-                </attributeTypes>
+            <property key="cellValueAction" type="enumeration" defaultValue="count">
+                <caption>Cell value action</caption>
+                <description>The action to perform on the values of the objects that exist behind one cell.</description>
+                <enumerationValues>
+                    <enumerationValue key="count">Count</enumerationValue>
+                    <enumerationValue key="sum">Sum</enumerationValue>
+                    <enumerationValue key="average">Average</enumerationValue>
+                    <enumerationValue key="min">Min</enumerationValue>
+                    <enumerationValue key="max">Max</enumerationValue>
+                    <enumerationValue key="display">Display</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="precisionForAverage" type="integer" defaultValue="0">
+                <caption>Average precision</caption>
+                <description>Decimal precision for average</description>
+            </property>
+            <property key="precisionForNumbers" type="integer" defaultValue="2">
+                <caption>Numeric precision</caption>
+                <description>Decimal precision for numeric values</description>
+            </property>
+            <property key="useThousandSeparators" type="boolean" defaultValue="false">
+                <caption>Use thousand separators</caption>
+                <description>Use thousand separators, for numeric values only.</description>
+            </property>
+            <property key="cellValueDateformat" type="textTemplate">
+                <caption>Cell value date format</caption>
+                <description>Cell value date format, applicable for date/time only</description>
+                <translations>
+                    <translation lang="en_US">MM/dd/yyyy</translation>
+                    <translation lang="en_GB">dd/MM/yyyy</translation>
+                    <translation lang="nl_NL">dd-MM-yyyy</translation>
+                </translations>
             </property>
 
+            <property key="showTotalColumn" type="boolean" defaultValue="false">
+                <caption>Show total column</caption>
+                <description>Show row total column as last column.</description>
+            </property>
+            <property key="totalColumnLabel" type="textTemplate" required="false">
+                <caption>Total column label</caption>
+                <description>Total column label</description>
+            </property>
+            <property key="showTotalRow" type="boolean" defaultValue="false">
+                <caption>Show total row</caption>
+                <description>Show row total row as last row.</description>
+            </property>
+            <property key="totalRowLabel" type="textTemplate" required="false">
+                <caption>Total row label</caption>
+                <description>Total row label</description>
+            </property>
+            <property key="noDataText" type="textTemplate">
+                <caption>No data text</caption>
+                <description>Text to display when there is no data to display</description>
+                <translations>
+                    <translation lang="en_GB">No data to display</translation>
+                    <translation lang="en_US">No data to display</translation>
+                    <translation lang="nl_NL">Geen gegevens beschikbaar</translation>
+                </translations>
+            </property>
+            <property key="useDisplayValueForCss" type="boolean" defaultValue="false">
+                <caption>Use value as css class</caption>
+                <description>For action display, whether to use the display value as additional CSS class.</description>
+            </property>
         </propertyGroup>
-    
-        <!-- Datasource details -->
+
+        <!-- Datasource properties -->
 
         <propertyGroup caption="Datasource details">
             <property key="ds" type="datasource" isList="true" required="false">
@@ -124,6 +168,13 @@
         <!-- Service call properties -->
 
         <propertyGroup caption="Service call">
+            <property key="dataChangeDateAttr" type="attribute" required="false">
+                <caption>Data change date</caption>
+                <description>Update the date in your logic to make the widget call the web service and update the table. (Pluggable widgets are rendered VERY often!)</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
             <property key="xIdDataType" type="enumeration" defaultValue="string">
                 <caption>X-axis type</caption>
                 <description></description>
@@ -183,74 +234,6 @@
                 </properties>
             </property>
 
-        </propertyGroup>
-    
-        <!-- Table properties -->
-
-        <propertyGroup caption="Table">
-            <property key="cellValueAction" type="enumeration" defaultValue="count">
-                <caption>Cell value action</caption>
-                <description>The action to perform on the values of the objects that exist behind one cell.</description>
-                <enumerationValues>
-                    <enumerationValue key="count">Count</enumerationValue>
-                    <enumerationValue key="sum">Sum</enumerationValue>
-                    <enumerationValue key="average">Average</enumerationValue>
-                    <enumerationValue key="min">Min</enumerationValue>
-                    <enumerationValue key="max">Max</enumerationValue>
-                    <enumerationValue key="display">Display</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="precisionForAverage" type="integer" defaultValue="0">
-                <caption>Average precision</caption>
-                <description>Decimal precision for average</description>
-            </property>
-            <property key="precisionForNumbers" type="integer" defaultValue="2">
-                <caption>Numeric precision</caption>
-                <description>Decimal precision for numeric values</description>
-            </property>
-            <property key="useThousandSeparators" type="boolean" defaultValue="false">
-                <caption>Use thousand separators</caption>
-                <description>Use thousand separators, for numeric values only.</description>
-            </property>
-            <property key="cellValueDateformat" type="textTemplate">
-                <caption>Cell value date format</caption>
-                <description>Cell value date format, applicable for date/time only</description>
-                <translations>
-                    <translation lang="en_US">MM/dd/yyyy</translation>
-                    <translation lang="en_GB">dd/MM/yyyy</translation>
-                    <translation lang="nl_NL">dd-MM-yyyy</translation>
-                </translations>
-            </property>
-
-            <property key="showTotalColumn" type="boolean" defaultValue="false">
-                <caption>Show total column</caption>
-                <description>Show row total column as last column.</description>
-            </property>
-            <property key="totalColumnLabel" type="textTemplate" required="false">
-                <caption>Total column label</caption>
-                <description>Total column label</description>
-            </property>
-            <property key="showTotalRow" type="boolean" defaultValue="false">
-                <caption>Show total row</caption>
-                <description>Show row total row as last row.</description>
-            </property>
-            <property key="totalRowLabel" type="textTemplate" required="false">
-                <caption>Total row label</caption>
-                <description>Total row label</description>
-            </property>
-            <property key="noDataText" type="textTemplate">
-                <caption>No data text</caption>
-                <description>Text to display when there is no data to display</description>
-                <translations>
-                    <translation lang="en_GB">No data to display</translation>
-                    <translation lang="en_US">No data to display</translation>
-                    <translation lang="nl_NL">Geen gegevens beschikbaar</translation>
-                </translations>
-            </property>
-            <property key="useDisplayValueForCss" type="boolean" defaultValue="false">
-                <caption>Use value as css class</caption>
-                <description>For action display, whether to use the display value as additional CSS class.</description>
-            </property>
         </propertyGroup>
     
         <!-- Conditional styling -->

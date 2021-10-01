@@ -18,11 +18,6 @@ However, implementations using the old widget probably use non-persistent entiti
 
 Especially when using non-persistent entities it is best to use a web service rather than a datasource because the web service does not return Mendix objects but only JSON data.
 
-# The Data changed date attribute
-Pluggable widgets are rendered **really** often due to the way React works. Clicking buttons, conditional visibility elsewhere on the page, changing the context object or opening a popup are examples. 
-
-To prevent lots of unnecessary server roundtrips, the widget will only reload the data when the value of the data changed date attribute changes. So whenever you want the widget to refresh, set the attribute to current date/time in your microflow. When the date did not change, the widget will just render the data loaded in a previous render.
-
 # Migrating from the old pivot table widget
 Migration depends on whether you currently use persistent data directly in the widget.
 
@@ -39,6 +34,12 @@ You don't have to rename your existing entities to make them fit! Don't forget t
 
 # Web service
 The widget can call webservices, which can improve performance, especially for larger datasets. As no Mendix objects are transferred, only JSON, the result will not impact the client state. Combining this with OQL to aggegate your data in the backend can be a great combination. You can specify additional parameters to include on the service call.
+
+## The Data changed date attribute
+Pluggable widgets are rendered **really** often due to the way React works. Clicking buttons, conditional visibility elsewhere on the page, changing the context object or opening a popup are examples. 
+
+To prevent lots of unnecessary server roundtrips, the widget will only call the web service to reload the data when the value of the data changed date attribute changes.
+So whenever you want the widget to refresh, set the attribute to current date/time in your microflow. When the date did not change, the widget will just render the data loaded in a previous render.
 
 ## Only to the app backend
 The widget will only call services on the app backend. If you wish to use external data, make that service call in your app logic.
