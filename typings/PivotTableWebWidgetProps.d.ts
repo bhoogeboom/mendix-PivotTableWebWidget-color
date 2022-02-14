@@ -100,8 +100,10 @@ export interface PivotTableWebWidgetContainerProps {
 }
 
 export interface PivotTableWebWidgetPreviewProps {
-    class: string;
+    className: string;
     style: string;
+    styleObject?: CSSProperties;
+    readOnly: boolean;
     dataSourceType: DataSourceTypeEnum;
     cellValueAction: CellValueActionEnum;
     precisionForAverage: number | null;

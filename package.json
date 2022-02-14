@@ -1,7 +1,7 @@
 {
   "name": "pivottablewebwidget",
   "widgetName": "PivotTableWebWidget",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Pivot table web widget",
   "copyright": "ITvisors 2020",
   "author": "Marcel Groeneweg",
@@ -24,7 +24,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@mendix/pluggable-widgets-tools": "^9.5.4",
+    "@mendix/pluggable-widgets-tools": "^9.10.0",
     "@types/big.js": "^6.0.2",
     "@types/classnames": "^2.2.4",
     "@types/react": "~17.0.1",
