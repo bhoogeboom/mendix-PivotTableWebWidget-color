@@ -6,6 +6,9 @@ import { ErrorArray, TableCellData, TableData, TableRowData, ValueDataType } fro
 import "./ui/PivotTableWebWidget.css";
 import Data from "./classes/Data";
 
+// Report mx as global defined elsewhere.
+declare const mx: any;
+
 export default class PivotTableWebWidget extends Component<PivotTableWebWidgetContainerProps> {
     private CLASS_WIDGET = "pivotTableWidget";
     private CLASS_CELL_CLICKABLE = "clickable";
@@ -19,7 +22,7 @@ export default class PivotTableWebWidget extends Component<PivotTableWebWidgetCo
 
     constructor(props: PivotTableWebWidgetContainerProps) {
         super(props);
-        this.errorArray = new Data().validateProps(props);
+        this.errorArray = [];
         this.state = {
             lastStateUpdate: undefined
         };

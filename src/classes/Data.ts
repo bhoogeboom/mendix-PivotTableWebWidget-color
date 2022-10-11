@@ -1,8 +1,11 @@
 // eslint-disable-next-line prettier/prettier
-import { AxisSortType, AxisKeyData, AxisMap, ErrorArray, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow, ConditionalStylingArray } from "../types/CustomTypes";
+import { AxisSortType, AxisKeyData, AxisMap, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow, ConditionalStylingArray } from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
+
+// Report mx as global defined elsewhere.
+declare const mx: any;
 
 export default class Data {
     private CLASS_Cell_TOP_LEFT = "pivotTableTopLeft";
@@ -37,91 +40,6 @@ export default class Data {
         "display_number",
         "display_string"
     ];
-
-    validateProps(widgetProps: PivotTableWebWidgetContainerProps): ErrorArray {
-        this._widgetProps = widgetProps;
-        const { dataSourceType } = this._widgetProps;
-
-        // Note that some checks need the data or fully available properties, so these are in method validateModelData
-
-        switch (dataSourceType) {
-            case "datasource":
-                return this.validateDatasourceProps();
-
-            case "serviceCall":
-                return this.validateServiceProps();
-        }
-    }
-
-    private validateCommonProps(): ErrorArray {
-        const { cellValueAction, showTotalColumn, showTotalRow, conditionalStylingList } = this._widgetProps;
-
-        const result: ErrorArray = [];
-
-        // Check whether total row/column is allowed
-        if (cellValueAction !== "count" && cellValueAction !== "sum") {
-            // Total row/column only allowed for count and sum
-            if (showTotalColumn) {
-                result.push("Total column is only supported for count and sum");
-            }
-            if (showTotalRow) {
-                result.push("Total row is only supported for count and sum");
-            }
-        }
-
-        if (cellValueAction === "display" && conditionalStylingList.length > 0) {
-            result.push("Conditional styling is not allowed for action Display");
-        }
-
-        return result;
-    }
-
-    private validateDatasourceProps(): ErrorArray {
-        const { ds, cellValueAction, cellValueAttr, xIdAttr, xLabelAttr, xSortAttr, yIdAttr, yLabelAttr, ySortAttr } = this._widgetProps;
-
-        const result: ErrorArray = this.validateCommonProps();
-
-        if (!ds) {
-            result.push("Datasource not configured");
-        }
-        if (!cellValueAttr && cellValueAction !== "count") {
-            result.push("Cell value not set");
-        }
-        if (!xIdAttr) {
-            result.push("X-axis ID not set");
-        }
-        if (!yIdAttr) {
-            result.push("Y-axis ID not set");
-        }
-        if (xSortAttr === "label") {
-            if (!xLabelAttr) {
-                result.push("X-axis label not set and sort is by label. Sort by ID or set a label attribute");
-            }
-        }
-        if (ySortAttr === "label") {
-            if (!yLabelAttr) {
-                result.push("Y-axis label not set and sort is by label. Sort by ID or set a label attribute");
-            }
-        }
-
-        return result;
-    }
-
-    private validateServiceProps(): ErrorArray {
-        const { dataChangeDateAttr, serviceUrl } = this._widgetProps;
-
-        const result: ErrorArray = this.validateCommonProps();
-
-        if (!serviceUrl) {
-            result.push("Service URL not set");
-        }
-
-        if (!dataChangeDateAttr) {
-            result.push("Data changed date attribute not set");
-        }
-
-        return result;
-    }
 
     getDataFromDatasource(widgetProps: PivotTableWebWidgetContainerProps): void {
         this._widgetProps = widgetProps;
@@ -452,18 +370,12 @@ export default class Data {
                     this.addErrorToModel("On click X-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
                     result = false;
                 }
-            } else {
-                this.addErrorToModel("On click X-axis ID attribute is required when On click action is configured");
-                result = false;
             }
             if (onCellClickYIdAttr) {
                 if (onCellClickYIdAttr.status === ValueStatus.Available && onCellClickYIdAttr.readOnly) {
                     this.addErrorToModel("On click Y-axis ID attribute is readonly, be sure to set your dataview to editable and grant access");
                     result = false;
                 }
-            } else {
-                this.addErrorToModel("On click Y-axis ID attribute is required when On click action is configured");
-                result = false;
             }
         }
 
@@ -491,7 +403,7 @@ export default class Data {
             }
         }
 
-        const { allowExport, exportDataAttr, exportFilenameAttr, exportAction } = this._widgetProps;
+        const { allowExport, exportDataAttr, exportFilenameAttr } = this._widgetProps;
 
         if (allowExport) {
             if (exportDataAttr) {
@@ -499,22 +411,12 @@ export default class Data {
                     this.addErrorToModel("Export data attribute is readonly, be sure to set your dataview to editable and grant access");
                     result = false;
                 }
-            } else {
-                this.addErrorToModel("Export data attribute is required when export is allowed");
-                result = false;
             }
             if (exportFilenameAttr) {
                 if (exportFilenameAttr.status === ValueStatus.Available && exportFilenameAttr.readOnly) {
                     this.addErrorToModel("Export file name attribute is readonly, be sure to set your dataview to editable and grant access");
                     result = false;
                 }
-            } else {
-                this.addErrorToModel("Export file name attribute is required when export is allowed");
-                result = false;
-            }
-            if (!exportAction) {
-                this.addErrorToModel("Export action is required when export is allowed");
-                result = false;
             }
         }
 
