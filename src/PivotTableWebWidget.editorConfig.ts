@@ -1,4 +1,5 @@
 import { PivotTableWebWidgetPreviewProps } from "../typings/PivotTableWebWidgetProps";
+import { hidePropertyIn, hidePropertiesIn } from "@mendix/pluggable-widgets-tools";
 
 export type Platform = "web" | "desktop";
 
@@ -90,13 +91,47 @@ type DatasourceProps = BaseProps & {
 
 export type PreviewProps = ImageProps | ContainerProps | RowLayoutProps | TextProps | DropZoneProps | SelectableProps | DatasourceProps;
 
-export function getProperties(_values: PivotTableWebWidgetPreviewProps, defaultProperties: Properties /* , target: Platform*/): Properties {
+export function getProperties(values: PivotTableWebWidgetPreviewProps, defaultProperties: Properties /* , target: Platform*/): Properties {
     // Do the values manipulation here to control the visibility of properties in Studio and Studio Pro conditionally.
-    /* Example
-    if (values.myProperty === "custom") {
-        delete defaultProperties.properties.myOtherProperty;
+
+    // Hide attribute related properties for count as no attribute value is used.
+    if (values.cellValueAction === "count") {
+        hidePropertiesIn(defaultProperties, values, ["precisionForAverage", "precisionForNumbers", "cellValueDateformat", "cellValueAttr"]);
     }
-    */
+
+    // Hide precision for average if no average requested
+    if (values.cellValueAction !== "average") {
+        hidePropertyIn(defaultProperties, values, "precisionForAverage");
+    }
+
+    // Hide total column label if not applicable
+    if (!values.showTotalColumn) {
+        hidePropertyIn(defaultProperties, values, "totalColumnLabel");
+    }
+
+    // Hide total row label if not applicable
+    if (!values.showTotalRow) {
+        hidePropertyIn(defaultProperties, values, "totalRowLabel");
+    }
+
+    // Hide onClick properties if no action configured
+    if (!values.onClickAction) {
+        hidePropertiesIn(defaultProperties, values, ["onCellClickXIdAttr", "onCellClickYIdAttr"]);
+    }
+
+    // Hide export properties if export not allowed
+    if (!values.allowExport) {
+        hidePropertiesIn(defaultProperties, values, [
+            "exportButtonCaption",
+            "exportButtonClass",
+            "exportFilenamePrefix",
+            "exportFilenameDateformat",
+            "exportDataAttr",
+            "exportFilenameAttr",
+            "exportAction"
+        ]);
+    }
+
     return defaultProperties;
 }
 

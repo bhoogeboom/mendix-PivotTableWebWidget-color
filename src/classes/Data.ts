@@ -1,5 +1,17 @@
 // eslint-disable-next-line prettier/prettier
-import { AxisSortType, AxisKeyData, AxisMap, ModelCellData, ModelCellValue, ModelData, TableCellData, TableRowData, ValueDataType, InputRow, ConditionalStylingArray } from "../types/CustomTypes";
+import {
+    AxisSortType,
+    AxisKeyData,
+    AxisMap,
+    ModelCellData,
+    ModelCellValue,
+    ModelData,
+    TableCellData,
+    TableRowData,
+    ValueDataType,
+    InputRow,
+    ConditionalStylingArray
+} from "../types/CustomTypes";
 import { Big } from "big.js";
 import { PivotTableWebWidgetContainerProps, XSortAttrEnum } from "../../typings/PivotTableWebWidgetProps";
 import { ListAttributeValue, ObjectItem, ValueStatus } from "mendix";
