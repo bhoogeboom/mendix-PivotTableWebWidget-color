@@ -103,6 +103,14 @@
                     <attributeType name="String"/>
                 </attributeTypes>
             </property>
+            <property key="cellColorAttr" type="attribute" dataSource="ds" required="false">
+                <caption>Cell color</caption>
+                <description>Dit is de kleur</description>
+                <attributeTypes>
+                    <attributeType name="Enum"/>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
             <property key="xIdAttr" type="attribute" dataSource="ds" required="false">
                 <caption>X-axis ID</caption>
                 <description>The attribute used for grouping the data on the X-axis.</description>
